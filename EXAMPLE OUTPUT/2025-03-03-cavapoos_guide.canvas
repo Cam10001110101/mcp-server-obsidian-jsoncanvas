@@ -1,0 +1,28 @@
+{
+	"nodes":[
+		{"id":"appearance","type":"text","text":"## Appearance\n\n- Size: Small to medium (9-14 inches tall)\n- Weight: 12-25 pounds\n- Coat: Soft, wavy to curly\n- Colors: Various (cream, gold, chestnut, tricolor)\n- Ears: Floppy\n- Lifespan: 10-15 years","x":100,"y":400,"width":300,"height":200,"color":"#FFD166"},
+		{"id":"temperament","type":"text","text":"## Temperament\n\n- Friendly and affectionate\n- Intelligent and trainable\n- Good with children and other pets\n- Sociable and outgoing\n- Low to moderate energy level\n- Eager to please","x":450,"y":400,"width":300,"height":200,"color":"#06D6A0"},
+		{"id":"health","type":"text","text":"## Health Considerations\n\n- Inherited conditions from parent breeds\n- Potential issues: heart problems, eye disorders, hip dysplasia\n- Regular vet check-ups recommended\n- Dental care important\n- Typically healthy when from reputable breeders","x":100,"y":650,"width":300,"height":200,"color":"#EF476F"},
+		{"id":"history","type":"text","text":"## History & Origin\n\n- Developed in the 1990s\n- Designer breed created for companionship\n- Combines best traits of both parent breeds\n- Gained popularity for hypoallergenic qualities\n- Not recognized by major kennel clubs as a purebred","x":1180,"y":850,"width":300,"height":200,"color":"#540D6E"},
+		{"id":"care","type":"text","text":"## Care Requirements\n\n- Grooming: Regular brushing, professional grooming every 6-8 weeks\n- Exercise: Daily walks, playtime\n- Training: Responds well to positive reinforcement\n- Diet: High-quality dog food appropriate for size and age","x":1030,"y":400,"width":300,"height":350,"color":"#118AB2"},
+		{"id":"adoption","type":"text","text":"## Adoption & Cost\n\nCavapoos typically cost $1,500-$4,000 from reputable breeders. Consider rescue organizations that may have Cavapoo mixes. Always research breeders thoroughly and avoid puppy mills.","x":120,"y":1030,"width":500,"height":150,"color":"#F77F00"},
+		{"id":"training","type":"text","text":"## Training & Exercise\n\n- Highly trainable due to intelligence\n- Eager to please and responsive\n- Early socialization important\n- Moderate exercise needs (30-60 minutes daily)\n- Enjoys interactive toys and games\n- Can excel at agility and obedience","x":700,"y":663,"width":300,"height":375,"color":"#073B4C"},
+		{"id":"resources","type":"link","url":"https://www.akc.org/expert-advice/dog-breeds/cavapoo-breed-facts-temperament-traits/","x":120,"y":1340,"width":500,"height":320,"color":"#2196F3"},
+		{"id":"title","type":"text","text":"# Cavapoos\n\nA comprehensive guide to the Cavalier King Charles Spaniel and Poodle mix","x":300,"y":-140,"width":500,"height":180,"color":"#FF6B6B"},
+		{"id":"overview","type":"text","text":"## Overview\n\nCavapoos are a crossbreed between a Cavalier King Charles Spaniel and a Poodle. They are known for their friendly temperament, intelligence, and hypoallergenic coat. They're popular family pets due to their gentle nature and adaptability.","x":350,"y":100,"width":500,"height":180,"color":"#4ECDC4"}
+	],
+	"edges":[
+		{"id":"edge1","fromNode":"title","fromSide":"bottom","toNode":"overview","toSide":"top"},
+		{"id":"edge2","fromNode":"overview","fromSide":"bottom","toNode":"appearance","toSide":"top"},
+		{"id":"edge3","fromNode":"overview","fromSide":"bottom","toNode":"temperament","toSide":"top"},
+		{"id":"edge4","fromNode":"overview","fromSide":"bottom","toNode":"care","toSide":"top"},
+		{"id":"edge5","fromNode":"appearance","fromSide":"bottom","toNode":"health","toSide":"top"},
+		{"id":"edge6","fromNode":"temperament","fromSide":"bottom","toNode":"training","toSide":"top"},
+		{"id":"edge7","fromNode":"care","fromSide":"bottom","toNode":"health","toSide":"top"},
+		{"id":"edge8","fromNode":"overview","fromSide":"right","toNode":"history","toSide":"top"},
+		{"id":"edge9","fromNode":"health","fromSide":"bottom","toNode":"adoption","toSide":"left"},
+		{"id":"edge10","fromNode":"training","fromSide":"bottom","toNode":"adoption","toSide":"top"},
+		{"id":"edge11","fromNode":"history","fromSide":"bottom","toNode":"adoption","toSide":"right"},
+		{"id":"edge12","fromNode":"adoption","fromSide":"bottom","toNode":"resources","toSide":"top"}
+	]
+}

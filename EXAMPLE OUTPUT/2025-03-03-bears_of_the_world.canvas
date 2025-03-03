@@ -1,0 +1,23 @@
+{
+	"nodes":[
+		{"id":"polar","type":"text","text":"## Polar Bear\n\n- Scientific name: *Ursus maritimus*\n- Habitat: Arctic sea ice\n- Diet: Primarily seals\n- Status: Vulnerable\n\nThe largest bear species and the largest land carnivore.","x":100,"y":200,"width":300,"height":200,"color":"#FFFFFF"},
+		{"id":"grizzly","type":"text","text":"## Grizzly Bear\n\n- Scientific name: *Ursus arctos horribilis*\n- Habitat: Forests, mountains, tundra\n- Diet: Omnivorous\n- Status: Least Concern\n\nKnown for their distinctive shoulder hump and long claws.","x":450,"y":200,"width":300,"height":200,"color":"#8B4513"},
+		{"id":"panda","type":"text","text":"## Giant Panda\n\n- Scientific name: *Ailuropoda melanoleuca*\n- Habitat: Bamboo forests in China\n- Diet: 99% bamboo\n- Status: Vulnerable\n\nIconic black and white bear, symbol of conservation.","x":800,"y":200,"width":300,"height":200,"color":"#000000"},
+		{"id":"conservation","type":"text","text":"## Conservation\n\nMany bear species face threats from habitat loss, poaching, and climate change. Conservation efforts include habitat protection, anti-poaching measures, and breeding programs.","x":400,"y":700,"width":500,"height":200,"color":"#4CAF50"},
+		{"id":"resources","type":"link","url":"https://www.worldwildlife.org/species/bear","x":400,"y":1000,"width":500,"height":480,"color":"#2196F3"},
+		{"id":"title","type":"text","text":"# Bears of the World\n\nAn overview of different bear species","x":350,"y":-200,"width":500,"height":100,"color":"#4285F4"},
+		{"id":"black","type":"text","text":"## American Black Bear\n\n- Scientific name: *Ursus americanus*\n- Habitat: Forests across North America\n- Diet: Omnivorous\n- Status: Least Concern\n\nMost common bear in North America.","x":-50,"y":550,"width":300,"height":350,"color":"#333333"},
+		{"id":"sloth","type":"text","text":"## Sloth Bear\n\n- Scientific name: *Melursus ursinus*\n- Habitat: Forests in South Asia\n- Diet: Insects, fruits, honey\n- Status: Vulnerable\n\nKnown for their shaggy coat and long snout.","x":1100,"y":580,"width":300,"height":200,"color":"#654321"},
+		{"id":"sun","type":"text","text":"## Sun Bear\n\n- Scientific name: *Helarctos malayanus*\n- Habitat: Tropical forests in Southeast Asia\n- Diet: Omnivorous, loves honey\n- Status: Vulnerable\n\nThe smallest bear species with a distinctive chest patch.","x":1140,"y":200,"width":300,"height":200,"color":"#FFA500"}
+	],
+	"edges":[
+		{"id":"edge1","fromNode":"title","fromSide":"bottom","toNode":"polar","toSide":"top"},
+		{"id":"edge2","fromNode":"title","fromSide":"bottom","toNode":"grizzly","toSide":"top"},
+		{"id":"edge3","fromNode":"title","fromSide":"bottom","toNode":"panda","toSide":"top"},
+		{"id":"edge4","fromNode":"conservation","fromSide":"top","toNode":"polar","toSide":"bottom"},
+		{"id":"edge5","fromNode":"conservation","fromSide":"top","toNode":"panda","toSide":"bottom"},
+		{"id":"edge6","fromNode":"conservation","fromSide":"top","toNode":"sun","toSide":"bottom"},
+		{"id":"edge7","fromNode":"conservation","fromSide":"top","toNode":"sloth","toSide":"bottom"},
+		{"id":"edge8","fromNode":"conservation","fromSide":"bottom","toNode":"resources","toSide":"top"}
+	]
+}
