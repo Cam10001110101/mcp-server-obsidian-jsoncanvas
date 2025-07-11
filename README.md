@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/cam10001110101-mcp-server-obsidian-jsoncanvas-badge.png)](https://mseep.ai/app/cam10001110101-mcp-server-obsidian-jsoncanvas)
+
 # JSON Canvas MCP Server
 
 A Model Context Protocol (MCP) server implementation that provides tools for working with JSON Canvas files according to the [official specification](https://jsoncanvas.org/spec/1.0/). This server enables creating, modifying, and validating infinite canvas data structures.
