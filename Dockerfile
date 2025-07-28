@@ -1,4 +1,4 @@
-FROM python:3.10-slim as builder
+FROM python:3.14.0rc1-slim as builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ COPY . .
 RUN /root/.cargo/bin/uv pip install --system .
 
 # Create final image
-FROM python:3.10-slim
+FROM python:3.14.0rc1-slim
 
 WORKDIR /app
 
