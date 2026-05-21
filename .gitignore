@@ -43,3 +43,10 @@ Thumbs.db
 htmlcov/
 .pytest_cache/
 .tox/
+
+# UI build dependencies (the built bundle in jsoncanvas/_ui/ IS committed)
+ui/node_modules/
+
+# Runtime canvas output and local MCP client config
+output/
+.mcp.json

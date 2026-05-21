@@ -1,9 +1,15 @@
-.PHONY: setup test lint format run example audit clean
+.PHONY: setup build-ui test lint format run example audit clean
 
 # Create virtual environment and install dependencies (incl. dev extras)
 setup:
 	uv venv
 	uv sync --extra dev
+
+# Build the inline canvas viewer (MCP Apps UI) into jsoncanvas/_ui/viewer.html.
+# Requires Node.js; the built bundle is committed, so this is only needed when
+# the UI source under ui/ changes.
+build-ui:
+	cd ui && npm install && npm run build
 
 # Run tests
 test:

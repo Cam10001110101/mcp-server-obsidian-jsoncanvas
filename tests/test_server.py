@@ -1,7 +1,5 @@
 """Tests for the MCP server layer."""
 
-import json
-
 import pytest
 from mcp.shared.memory import (
     create_connected_server_and_client_session as client_session,
@@ -45,8 +43,8 @@ def test_create_read_list_round_trip(_output_dir):
     assert len(names) == 1
     assert names[0].endswith("-demo.canvas")
 
-    text = read_canvas(names[0])
-    assert json.loads(text)["nodes"][0]["id"] == "a"
+    doc = read_canvas(names[0])
+    assert doc.nodes[0]["id"] == "a"
 
 
 def test_create_with_edges_and_group_background_style(_output_dir):
@@ -127,3 +125,42 @@ async def test_tools_exposed_over_protocol(_output_dir):
         )
         assert result.isError is False
         assert result.structuredContent["node_count"] == 1
+
+
+async def test_canvas_viewer_ui_wiring(_output_dir):
+    async with client_session(mcp) as client:
+        # The viewer is registered with the MCP Apps UI MIME type.
+        resources = await client.list_resources()
+        viewer = {str(r.uri): r for r in resources.resources}.get(
+            "ui://canvas/viewer.html"
+        )
+        assert viewer is not None
+        assert viewer.mimeType == "text/html;profile=mcp-app"
+
+        # read_canvas / create_canvas advertise the viewer via _meta.ui.resourceUri;
+        # the plain tools do not.
+        by_name = {t.name: t for t in (await client.list_tools()).tools}
+        for name in ("read_canvas", "create_canvas"):
+            meta = by_name[name].meta or {}
+            assert meta.get("ui", {}).get("resourceUri") == "ui://canvas/viewer.html"
+        assert by_name["validate_canvas"].meta is None
+        assert by_name["list_canvases"].meta is None
+
+        # create_canvas returns the full canvas document for the UI to render.
+        created = await client.call_tool(
+            "create_canvas", {"nodes": [TEXT_NODE], "filename": "ui"}
+        )
+        assert created.structuredContent["canvas"]["nodes"][0]["id"] == "a"
+
+        # read_canvas exposes nodes as structured content, and still ships a text
+        # fallback for non-UI hosts.
+        names = list_canvases()
+        read = await client.call_tool("read_canvas", {"filename": names[0]})
+        assert read.structuredContent["nodes"][0]["id"] == "a"
+        assert "nodes" in read.content[0].text
+
+
+def test_load_ui_html_returns_bundle():
+    html = server._load_ui_html()
+    assert "<html" in html.lower()
+    assert "</html>" in html.lower()
