@@ -1,0 +1,233 @@
+{
+  "nodes": [
+    {
+      "id": "title",
+      "type": "text",
+      "x": 480,
+      "y": -200,
+      "width": 640,
+      "height": 150,
+      "color": "6",
+      "text": "# How an AI Agent Works (2026)\n\nThe loop: a frontier model plans, calls tools over MCP, observes results, updates memory, and repeats \u2014 all under governance."
+    },
+    {
+      "id": "loop",
+      "type": "group",
+      "x": 320,
+      "y": 20,
+      "width": 880,
+      "height": 250,
+      "color": "6",
+      "label": "The agent loop"
+    },
+    {
+      "id": "user",
+      "type": "text",
+      "x": -40,
+      "y": 70,
+      "width": 260,
+      "height": 120,
+      "color": "4",
+      "text": "## User / Task\n\nA goal stated in natural language."
+    },
+    {
+      "id": "model",
+      "type": "text",
+      "x": 360,
+      "y": 70,
+      "width": 320,
+      "height": 150,
+      "color": "1",
+      "text": "## Model (the brain)\n\nClaude Opus 4.7 / GPT-5.5 / Gemini 3.1 \u2014 plans, reasons, picks the next action."
+    },
+    {
+      "id": "mcp",
+      "type": "text",
+      "x": 800,
+      "y": 60,
+      "width": 360,
+      "height": 170,
+      "color": "5",
+      "text": "## MCP \u2014 the USB-C for AI\n\nOpen standard (Nov 2024). One protocol for tools, resources & prompts. 9+ SDKs, ~2000 registry servers, 70+ clients."
+    },
+    {
+      "id": "tools",
+      "type": "text",
+      "x": 800,
+      "y": 320,
+      "width": 260,
+      "height": 130,
+      "color": "2",
+      "text": "### Tools\n\nFunctions the agent calls \u2014 search, code, even this JSON Canvas server."
+    },
+    {
+      "id": "data",
+      "type": "text",
+      "x": 1100,
+      "y": 320,
+      "width": 260,
+      "height": 130,
+      "color": "2",
+      "text": "### Resources\n\nFiles, databases & APIs exposed for context."
+    },
+    {
+      "id": "memory",
+      "type": "text",
+      "x": 360,
+      "y": 320,
+      "width": 320,
+      "height": 130,
+      "color": "3",
+      "text": "## Memory\n\nPersistent facts across turns \u2014 the model writes & reads memory files."
+    },
+    {
+      "id": "orchestration",
+      "type": "text",
+      "x": 340,
+      "y": 500,
+      "width": 360,
+      "height": 140,
+      "color": "5",
+      "text": "## Orchestration\n\nMulti-agent: a planner spawns sub-agents in parallel (Grok's 4-agent ensemble, Anthropic Managed Agents)."
+    },
+    {
+      "id": "governance",
+      "type": "text",
+      "x": 800,
+      "y": 500,
+      "width": 360,
+      "height": 140,
+      "color": "1",
+      "text": "## Governance\n\nPermissions, sandboxing, Origin checks & audit logs \u2014 agency kept under control."
+    },
+    {
+      "id": "transports",
+      "type": "text",
+      "x": 1230,
+      "y": 70,
+      "width": 250,
+      "height": 130,
+      "color": "5",
+      "text": "### Transports\n\nstdio (local) \u00b7 Streamable HTTP (remote)."
+    },
+    {
+      "id": "src",
+      "type": "link",
+      "x": -40,
+      "y": 320,
+      "width": 300,
+      "height": 90,
+      "url": "https://modelcontextprotocol.io/docs/learn"
+    }
+  ],
+  "edges": [
+    {
+      "id": "a1",
+      "fromNode": "title",
+      "toNode": "model",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "label": "task"
+    },
+    {
+      "id": "a2",
+      "fromNode": "user",
+      "toNode": "model",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "right",
+      "toSide": "left",
+      "label": "goal"
+    },
+    {
+      "id": "a3",
+      "fromNode": "model",
+      "toNode": "mcp",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "right",
+      "toSide": "left",
+      "color": "5",
+      "label": "calls tools"
+    },
+    {
+      "id": "a4",
+      "fromNode": "mcp",
+      "toNode": "tools",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "a5",
+      "fromNode": "mcp",
+      "toNode": "data",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "a6",
+      "fromNode": "tools",
+      "toNode": "model",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "left",
+      "toSide": "bottom",
+      "color": "4",
+      "label": "results"
+    },
+    {
+      "id": "a7",
+      "fromNode": "model",
+      "toNode": "memory",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "color": "3",
+      "label": "read / write"
+    },
+    {
+      "id": "a8",
+      "fromNode": "model",
+      "toNode": "orchestration",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "color": "5",
+      "label": "delegates"
+    },
+    {
+      "id": "a9",
+      "fromNode": "governance",
+      "toNode": "mcp",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "color": "1",
+      "label": "guards"
+    },
+    {
+      "id": "a10",
+      "fromNode": "mcp",
+      "toNode": "transports",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "a11",
+      "fromNode": "mcp",
+      "toNode": "src",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "label": "spec"
+    }
+  ]
+}

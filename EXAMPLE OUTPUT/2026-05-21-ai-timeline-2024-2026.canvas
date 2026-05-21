@@ -1,0 +1,301 @@
+{
+  "nodes": [
+    {
+      "id": "title",
+      "type": "text",
+      "x": 220,
+      "y": -200,
+      "width": 480,
+      "height": 150,
+      "color": "6",
+      "text": "# AI Timeline: MCP & the Frontier\n\nNov 2024 \u2192 May 2026. Red = Anthropic, cyan = MCP, green = OpenAI, blue = Google, orange = policy, purple = milestone."
+    },
+    {
+      "id": "t01",
+      "type": "text",
+      "x": 220,
+      "y": 0,
+      "width": 480,
+      "height": 110,
+      "color": "5",
+      "text": "## Nov 25, 2024 \u2014 MCP open-sourced\n\nAnthropic ships the \"USB-C for AI\" open standard."
+    },
+    {
+      "id": "t02",
+      "type": "text",
+      "x": 220,
+      "y": 150,
+      "width": 480,
+      "height": 110,
+      "color": "1",
+      "text": "## Feb 24, 2025 \u2014 Claude Code\n\nAgentic coding tool launches as a research preview."
+    },
+    {
+      "id": "t03",
+      "type": "text",
+      "x": 220,
+      "y": 300,
+      "width": 480,
+      "height": 110,
+      "color": "1",
+      "text": "## May 2025 \u2014 Claude 4\n\nOpus 4 & Sonnet 4: extended thinking, parallel tools, memory."
+    },
+    {
+      "id": "t04",
+      "type": "text",
+      "x": 220,
+      "y": 450,
+      "width": 480,
+      "height": 110,
+      "color": "5",
+      "text": "## Sep 2025 \u2014 MCP Registry\n\nCentral index launches with server.json + DNS namespaces."
+    },
+    {
+      "id": "t05",
+      "type": "text",
+      "x": 220,
+      "y": 600,
+      "width": 480,
+      "height": 110,
+      "color": "1",
+      "text": "## Nov 24, 2025 \u2014 Claude Opus 4.5\n\nHigh-intelligence model for coding, agents & computer use."
+    },
+    {
+      "id": "t06",
+      "type": "text",
+      "x": 220,
+      "y": 750,
+      "width": 480,
+      "height": 110,
+      "color": "5",
+      "text": "## Nov 25, 2025 \u2014 One Year of MCP\n\nSpec rev 2025-11-25; registry nears ~2000 servers (+407%)."
+    },
+    {
+      "id": "t07",
+      "type": "text",
+      "x": 220,
+      "y": 900,
+      "width": 480,
+      "height": 110,
+      "color": "#10a37f",
+      "text": "## Dec 1, 2025 \u2014 OpenAI GPT-5\n\nUnified system with a real-time reasoning router."
+    },
+    {
+      "id": "t08",
+      "type": "text",
+      "x": 220,
+      "y": 1050,
+      "width": 480,
+      "height": 110,
+      "color": "6",
+      "text": "## Jan 15, 2026 \u2014 Agents go mainstream\n\nProduction agent frameworks handle multi-step workflows."
+    },
+    {
+      "id": "t09",
+      "type": "text",
+      "x": 220,
+      "y": 1200,
+      "width": 480,
+      "height": 110,
+      "color": "#4285f4",
+      "text": "## Feb 19, 2026 \u2014 Gemini 3.1 Pro\n\nGPQA 94.3%, ARC-AGI-2 77.1%, up to 2M ctx, multimodal."
+    },
+    {
+      "id": "t10",
+      "type": "text",
+      "x": 220,
+      "y": 1350,
+      "width": 480,
+      "height": 110,
+      "color": "2",
+      "text": "## Feb 20, 2026 \u2014 Global AI treaty proposed\n\nUN framework; 40+ nations sign on frontier safety testing."
+    },
+    {
+      "id": "t11",
+      "type": "text",
+      "x": 220,
+      "y": 1500,
+      "width": 480,
+      "height": 110,
+      "color": "2",
+      "text": "## Mar 10, 2026 \u2014 xAI Grok 4.20\n\n2M-token context and a native 4-agent ensemble."
+    },
+    {
+      "id": "t12",
+      "type": "text",
+      "x": 220,
+      "y": 1650,
+      "width": 480,
+      "height": 110,
+      "color": "1",
+      "text": "## Apr 16, 2026 \u2014 Claude Opus 4.7\n\n#1 on SWE-bench & MCP Atlas; advanced SWE + hi-res vision."
+    },
+    {
+      "id": "t13",
+      "type": "text",
+      "x": 220,
+      "y": 1800,
+      "width": 480,
+      "height": 110,
+      "color": "#10a37f",
+      "text": "## Apr 23, 2026 \u2014 OpenAI GPT-5.5\n\nFirst fully retrained base model since GPT-4.5; 1M ctx."
+    },
+    {
+      "id": "t14",
+      "type": "text",
+      "x": 220,
+      "y": 1950,
+      "width": 480,
+      "height": 110,
+      "color": "1",
+      "text": "## Apr 2026 \u2014 Managed Agents & Routines\n\nAnthropic ships cloud-hosted agents + scheduled Claude Code."
+    },
+    {
+      "id": "t15",
+      "type": "text",
+      "x": 220,
+      "y": 2100,
+      "width": 480,
+      "height": 120,
+      "color": "6",
+      "text": "## May 2026 \u2014 You are here\n\nAgentic, multi-polar AI: full-stack competition, MCP everywhere."
+    }
+  ],
+  "edges": [
+    {
+      "id": "s1",
+      "fromNode": "title",
+      "toNode": "t01",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s2",
+      "fromNode": "t01",
+      "toNode": "t02",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s3",
+      "fromNode": "t02",
+      "toNode": "t03",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s4",
+      "fromNode": "t03",
+      "toNode": "t04",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s5",
+      "fromNode": "t04",
+      "toNode": "t05",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s6",
+      "fromNode": "t05",
+      "toNode": "t06",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s7",
+      "fromNode": "t06",
+      "toNode": "t07",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s8",
+      "fromNode": "t07",
+      "toNode": "t08",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s9",
+      "fromNode": "t08",
+      "toNode": "t09",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s10",
+      "fromNode": "t09",
+      "toNode": "t10",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s11",
+      "fromNode": "t10",
+      "toNode": "t11",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s12",
+      "fromNode": "t11",
+      "toNode": "t12",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s13",
+      "fromNode": "t12",
+      "toNode": "t13",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s14",
+      "fromNode": "t13",
+      "toNode": "t14",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "s15",
+      "fromNode": "t14",
+      "toNode": "t15",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ]
+}

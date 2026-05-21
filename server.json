@@ -1,0 +1,83 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.cam10001110101/obsidian-jsoncanvas",
+  "title": "Obsidian JSON Canvas",
+  "description": "Create, validate, read, edit, export, and search JSON Canvas (.canvas) files.",
+  "version": "0.2.0",
+  "repository": {
+    "url": "https://github.com/Cam10001110101/mcp-server-obsidian-jsoncanvas",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "mcp-server-jsoncanvas",
+      "version": "0.2.0",
+      "runtimeHint": "uvx",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "OUTPUT_PATH",
+          "description": "Directory where .canvas files are written and read.",
+          "default": "./output"
+        },
+        {
+          "name": "MCP_TRANSPORT",
+          "description": "Transport to serve on.",
+          "default": "stdio",
+          "choices": ["stdio", "streamable-http"]
+        },
+        {
+          "name": "MCP_HOST",
+          "description": "Host for the streamable-http transport.",
+          "default": "127.0.0.1"
+        },
+        {
+          "name": "MCP_PORT",
+          "description": "Port for the streamable-http transport.",
+          "default": "8000"
+        },
+        {
+          "name": "MCP_CORS_ORIGINS",
+          "description": "Comma-separated allowed CORS origins for the HTTP transport; set specific origins for non-local use (avoid '*').",
+          "default": "*"
+        }
+      ]
+    },
+    {
+      "registryType": "oci",
+      "identifier": "ghcr.io/cam10001110101/mcp-server-obsidian-jsoncanvas",
+      "version": "0.2.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "OUTPUT_PATH",
+          "description": "Directory inside the container where .canvas files are written and read; mount a volume here to persist output.",
+          "default": "/data/output"
+        },
+        {
+          "name": "MCP_TRANSPORT",
+          "description": "Transport to serve on.",
+          "default": "stdio",
+          "choices": ["stdio", "streamable-http"]
+        },
+        {
+          "name": "MCP_HOST",
+          "description": "Host for the streamable-http transport; use 0.0.0.0 to expose the container port.",
+          "default": "127.0.0.1"
+        },
+        {
+          "name": "MCP_PORT",
+          "description": "Port for the streamable-http transport.",
+          "default": "8000"
+        },
+        {
+          "name": "MCP_CORS_ORIGINS",
+          "description": "Comma-separated allowed CORS origins for the HTTP transport; set specific origins for non-local use (avoid '*').",
+          "default": "*"
+        }
+      ]
+    }
+  ]
+}

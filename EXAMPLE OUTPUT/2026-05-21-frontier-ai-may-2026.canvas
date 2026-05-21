@@ -1,0 +1,236 @@
+{
+  "nodes": [
+    {
+      "id": "hub",
+      "type": "text",
+      "x": 660,
+      "y": -200,
+      "width": 580,
+      "height": 150,
+      "color": "#a882ff",
+      "text": "# Frontier AI \u2014 May 2026\n\nA multi-polar race: no single model wins every category. Four closed frontier labs trade the lead while open weights close the gap fast."
+    },
+    {
+      "id": "g_anthropic",
+      "type": "group",
+      "x": -20,
+      "y": 80,
+      "width": 360,
+      "height": 460,
+      "color": "1",
+      "label": "Anthropic"
+    },
+    {
+      "id": "opus47",
+      "type": "text",
+      "x": 0,
+      "y": 150,
+      "width": 320,
+      "height": 170,
+      "color": "1",
+      "text": "## Claude Opus 4.7\n\nApr 16, 2026 \u00b7 #1 SWE-bench & MCP Atlas \u00b7 1M ctx (beta) \u00b7 $5 / $25 per MTok \u00b7 advanced SWE, long agents, hi-res vision."
+    },
+    {
+      "id": "sonnet46",
+      "type": "text",
+      "x": 0,
+      "y": 360,
+      "width": 320,
+      "height": 140,
+      "color": "1",
+      "text": "### Claude Sonnet 4.6\n\nFeb 17 \u00b7 1M ctx \u00b7 near-Opus coding at ~60% cost."
+    },
+    {
+      "id": "g_openai",
+      "type": "group",
+      "x": 360,
+      "y": 80,
+      "width": 360,
+      "height": 460,
+      "color": "5",
+      "label": "OpenAI"
+    },
+    {
+      "id": "gpt55",
+      "type": "text",
+      "x": 380,
+      "y": 150,
+      "width": 320,
+      "height": 180,
+      "color": "5",
+      "text": "## GPT-5.5\n\nApr 23, 2026 \u00b7 first full retrain since GPT-4.5 \u00b7 1M ctx \u00b7 $5 / $30 \u00b7 leads Terminal-Bench & OSWorld \u00b7 native MCP."
+    },
+    {
+      "id": "g_google",
+      "type": "group",
+      "x": 740,
+      "y": 80,
+      "width": 360,
+      "height": 460,
+      "color": "4",
+      "label": "Google DeepMind"
+    },
+    {
+      "id": "gemini31",
+      "type": "text",
+      "x": 760,
+      "y": 150,
+      "width": 320,
+      "height": 180,
+      "color": "4",
+      "text": "## Gemini 3.1 Pro\n\nFeb 19, 2026 \u00b7 GPQA Diamond 94.3%, ARC-AGI-2 77.1% \u00b7 up to 2M ctx \u00b7 fully multimodal \u00b7 $1.25 / $5."
+    },
+    {
+      "id": "g_xai",
+      "type": "group",
+      "x": 1120,
+      "y": 80,
+      "width": 360,
+      "height": 460,
+      "color": "2",
+      "label": "xAI"
+    },
+    {
+      "id": "grok420",
+      "type": "text",
+      "x": 1140,
+      "y": 150,
+      "width": 320,
+      "height": 180,
+      "color": "2",
+      "text": "## Grok 4.20\n\nMar 10, 2026 \u00b7 2M ctx (largest) \u00b7 4-agent ensemble (Grok/Harper/Benjamin/Lucas) \u00b7 ~235 tok/s \u00b7 real-time X data."
+    },
+    {
+      "id": "g_open",
+      "type": "group",
+      "x": 1500,
+      "y": 80,
+      "width": 380,
+      "height": 460,
+      "color": "3",
+      "label": "Open weights"
+    },
+    {
+      "id": "deepseek4",
+      "type": "text",
+      "x": 1520,
+      "y": 150,
+      "width": 340,
+      "height": 170,
+      "color": "3",
+      "text": "## DeepSeek V4-Pro\n\nApr 24, 2026 \u00b7 MIT open weights \u00b7 1.6T / 49B active MoE \u00b7 runs on Huawei Ascend \u00b7 1M ctx."
+    },
+    {
+      "id": "glm51",
+      "type": "text",
+      "x": 1520,
+      "y": 360,
+      "width": 340,
+      "height": 140,
+      "color": "3",
+      "text": "### GLM-5.1\n\nMIT \u00b7 beat GPT-5.4 & Claude on SWE-bench Pro."
+    },
+    {
+      "id": "trend",
+      "type": "text",
+      "x": 660,
+      "y": 600,
+      "width": 580,
+      "height": 150,
+      "color": "6",
+      "text": "## What changed in 2026\n\nThe open\u2194closed gap shrank from 12\u201318 months (2024) to 3\u20136 months. Competition is now full-stack: model + tool use + runtime + governance."
+    },
+    {
+      "id": "src",
+      "type": "link",
+      "x": 1500,
+      "y": 600,
+      "width": 380,
+      "height": 90,
+      "url": "https://www.attainmentlabs.com/frontier-ai-report-april-2026"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "fromNode": "hub",
+      "toNode": "opus47",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "color": "1",
+      "label": "Anthropic"
+    },
+    {
+      "id": "e2",
+      "fromNode": "hub",
+      "toNode": "gpt55",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "color": "5",
+      "label": "OpenAI"
+    },
+    {
+      "id": "e3",
+      "fromNode": "hub",
+      "toNode": "gemini31",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "color": "4",
+      "label": "Google"
+    },
+    {
+      "id": "e4",
+      "fromNode": "hub",
+      "toNode": "grok420",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "color": "2",
+      "label": "xAI"
+    },
+    {
+      "id": "e5",
+      "fromNode": "hub",
+      "toNode": "deepseek4",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "color": "3",
+      "label": "open"
+    },
+    {
+      "id": "e6",
+      "fromNode": "hub",
+      "toNode": "trend",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "color": "6"
+    },
+    {
+      "id": "e7",
+      "fromNode": "opus47",
+      "toNode": "sonnet46",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "e8",
+      "fromNode": "deepseek4",
+      "toNode": "glm51",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ]
+}
