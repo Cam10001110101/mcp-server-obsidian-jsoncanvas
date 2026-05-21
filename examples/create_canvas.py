@@ -11,47 +11,18 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from jsoncanvas import (
     Canvas,
-    TextNode,
-    FileNode,
-    LinkNode,
-    GroupNode,
     Edge,
+    FileNode,
+    GroupNode,
+    LinkNode,
+    TextNode,
 )
-
-
-def load_config() -> dict:
-    """Load configuration from config.json.
-
-    Returns:
-        Dictionary containing configuration values
-
-    Raises:
-        FileNotFoundError: If config.json doesn't exist
-        KeyError: If required configuration values are missing
-    """
-    config_path = Path("config.json")
-    if not config_path.exists():
-        print("Error: config.json not found.")
-        print("Please copy config.json.template to config.json and customize it.")
-        sys.exit(1)
-
-    with open(config_path) as f:
-        config = json.load(f)
-
-    # Validate required configuration
-    if "output" not in config:
-        raise KeyError("Missing 'output' section in config.json")
-    if "path" not in config["output"]:
-        raise KeyError("Missing 'path' in output section of config.json")
-
-    return config
 
 
 def main():
     """Create a sample canvas and save it to a JSON file."""
-    # Load configuration
-    config = load_config()
-    output_path = Path(config["output"]["path"])
+    # Output directory comes from OUTPUT_PATH (default ./output), matching the server.
+    output_path = Path(os.environ.get("OUTPUT_PATH", "./output"))
 
     # Create nodes
     title_node = TextNode(
@@ -60,8 +31,8 @@ def main():
         y=100,
         width=400,
         height=100,
-        text="# JSON Canvas Example\n\nThis is a demonstration of the JSON Canvas format.",
-        color="#4285F4"  # Google Blue
+        text="# JSON Canvas Example\n\nA demonstration of the JSON Canvas format.",
+        color="#4285F4",  # Google Blue
     )
 
     file_node = FileNode(
@@ -72,7 +43,7 @@ def main():
         height=100,
         file="specification.md",
         subpath="#nodes",
-        color="2"  # Orange preset
+        color="2",  # Orange preset
     )
 
     link_node = LinkNode(
@@ -82,7 +53,7 @@ def main():
         width=300,
         height=80,
         url="https://jsoncanvas.org",
-        color="4"  # Green preset
+        color="4",  # Green preset
     )
 
     group_node = GroupNode(
@@ -92,7 +63,7 @@ def main():
         width=400,
         height=200,
         label="Example Group",
-        color="6"  # Purple preset
+        color="6",  # Purple preset
     )
 
     code_node = TextNode(
@@ -101,7 +72,7 @@ def main():
         y=300,
         width=300,
         height=100,
-        text="```python\nprint('Hello, JSON Canvas!')\n```"
+        text="```python\nprint('Hello, JSON Canvas!')\n```",
     )
 
     # Create edges
@@ -111,7 +82,7 @@ def main():
         to_node="spec",
         from_side="right",
         to_side="left",
-        color="1"  # Red preset
+        color="1",  # Red preset
     )
 
     title_to_website = Edge(
@@ -120,7 +91,7 @@ def main():
         to_node="website",
         from_side="bottom",
         to_side="top",
-        label="Learn More"
+        label="Learn More",
     )
 
     website_to_group = Edge(
@@ -128,7 +99,7 @@ def main():
         from_node="website",
         to_node="examples",
         from_side="right",
-        to_side="left"
+        to_side="left",
     )
 
     # Create canvas and add nodes and edges

@@ -1,19 +1,17 @@
 """Core functionality for JSON Canvas."""
 
-from typing import Dict, List, Optional, Union, cast
+from typing import Dict, List, Optional
 
-from .errors import DuplicateIdError, ReferenceError, ValidationError
-from .nodes import Node, TextNode, FileNode, LinkNode, GroupNode
 from .edges import Edge
+from .errors import DuplicateIdError, ReferenceError, ValidationError
+from .nodes import FileNode, GroupNode, LinkNode, Node, TextNode
 
 
 class Canvas:
     """A JSON Canvas representation according to the 1.0 specification."""
 
     def __init__(
-        self,
-        nodes: Optional[List[Node]] = None,
-        edges: Optional[List[Edge]] = None
+        self, nodes: Optional[List[Node]] = None, edges: Optional[List[Edge]] = None
     ) -> None:
         """Initialize a new Canvas.
 
@@ -54,7 +52,8 @@ class Canvas:
         for edge in self.edges:
             if edge.from_node not in node_ids:
                 raise ReferenceError(
-                    f"Edge {edge.id} references non-existent from_node: {edge.from_node}"
+                    f"Edge {edge.id} references non-existent "
+                    f"from_node: {edge.from_node}"
                 )
             if edge.to_node not in node_ids:
                 raise ReferenceError(
@@ -88,7 +87,7 @@ class Canvas:
         # Check for duplicate ID
         if any(e.id == edge.id for e in self.edges):
             raise DuplicateIdError(f"Edge with ID {edge.id} already exists")
-        
+
         # Validate node references
         node_ids = {node.id for node in self.nodes}
         if edge.from_node not in node_ids:
@@ -99,7 +98,7 @@ class Canvas:
             raise ReferenceError(
                 f"Edge references non-existent to_node: {edge.to_node}"
             )
-            
+
         self.edges.append(edge)
 
     def get_node(self, node_id: str) -> Optional[Node]:
@@ -145,18 +144,19 @@ class Canvas:
             if node.id == node_id:
                 node_index = i
                 break
-        
+
         if node_index is None:
             return None
-            
+
         removed_node = self.nodes.pop(node_index)
-        
+
         # Remove all edges connected to this node
         self.edges = [
-            edge for edge in self.edges
+            edge
+            for edge in self.edges
             if edge.from_node != node_id and edge.to_node != node_id
         ]
-        
+
         return removed_node
 
     def remove_edge(self, edge_id: str) -> Optional[Edge]:
@@ -173,10 +173,10 @@ class Canvas:
             if edge.id == edge_id:
                 edge_index = i
                 break
-                
+
         if edge_index is None:
             return None
-            
+
         return self.edges.pop(edge_index)
 
     def to_dict(self) -> Dict:
@@ -186,12 +186,12 @@ class Canvas:
             Dictionary representation of the canvas
         """
         canvas_dict: Dict[str, list] = {}
-        
+
         if self.nodes:
             canvas_dict["nodes"] = [node.to_dict() for node in self.nodes]
         if self.edges:
             canvas_dict["edges"] = [edge.to_dict() for edge in self.edges]
-            
+
         return canvas_dict
 
     @classmethod
@@ -214,48 +214,56 @@ class Canvas:
         for node_data in data.get("nodes", []):
             node_type = node_data.get("type")
             if node_type == "text":
-                nodes.append(TextNode(
-                    id=node_data["id"],
-                    x=node_data["x"],
-                    y=node_data["y"],
-                    width=node_data["width"],
-                    height=node_data["height"],
-                    text=node_data["text"],
-                    color=node_data.get("color")
-                ))
+                nodes.append(
+                    TextNode(
+                        id=node_data["id"],
+                        x=node_data["x"],
+                        y=node_data["y"],
+                        width=node_data["width"],
+                        height=node_data["height"],
+                        text=node_data["text"],
+                        color=node_data.get("color"),
+                    )
+                )
             elif node_type == "file":
-                nodes.append(FileNode(
-                    id=node_data["id"],
-                    x=node_data["x"],
-                    y=node_data["y"],
-                    width=node_data["width"],
-                    height=node_data["height"],
-                    file=node_data["file"],
-                    subpath=node_data.get("subpath"),
-                    color=node_data.get("color")
-                ))
+                nodes.append(
+                    FileNode(
+                        id=node_data["id"],
+                        x=node_data["x"],
+                        y=node_data["y"],
+                        width=node_data["width"],
+                        height=node_data["height"],
+                        file=node_data["file"],
+                        subpath=node_data.get("subpath"),
+                        color=node_data.get("color"),
+                    )
+                )
             elif node_type == "link":
-                nodes.append(LinkNode(
-                    id=node_data["id"],
-                    x=node_data["x"],
-                    y=node_data["y"],
-                    width=node_data["width"],
-                    height=node_data["height"],
-                    url=node_data["url"],
-                    color=node_data.get("color")
-                ))
+                nodes.append(
+                    LinkNode(
+                        id=node_data["id"],
+                        x=node_data["x"],
+                        y=node_data["y"],
+                        width=node_data["width"],
+                        height=node_data["height"],
+                        url=node_data["url"],
+                        color=node_data.get("color"),
+                    )
+                )
             elif node_type == "group":
-                nodes.append(GroupNode(
-                    id=node_data["id"],
-                    x=node_data["x"],
-                    y=node_data["y"],
-                    width=node_data["width"],
-                    height=node_data["height"],
-                    label=node_data.get("label"),
-                    background=node_data.get("background"),
-                    background_style=node_data.get("backgroundStyle"),
-                    color=node_data.get("color")
-                ))
+                nodes.append(
+                    GroupNode(
+                        id=node_data["id"],
+                        x=node_data["x"],
+                        y=node_data["y"],
+                        width=node_data["width"],
+                        height=node_data["height"],
+                        label=node_data.get("label"),
+                        background=node_data.get("background"),
+                        background_style=node_data.get("backgroundStyle"),
+                        color=node_data.get("color"),
+                    )
+                )
             else:
                 raise ValidationError(f"Invalid node type: {node_type}")
 

@@ -1,7 +1,7 @@
 """Node implementations for JSON Canvas."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, Union, Literal
+from typing import Dict, Literal, Optional
 
 from .errors import InvalidNodeError
 
@@ -16,7 +16,7 @@ class Node(ABC):
         y: int,
         width: int,
         height: int,
-        color: Optional[str] = None
+        color: Optional[str] = None,
     ) -> None:
         """Initialize a node.
 
@@ -72,8 +72,8 @@ class Node(ABC):
         """
         if color is not None:
             if not (
-                (color.startswith("#") and len(color) == 7) or
-                color in ["1", "2", "3", "4", "5", "6"]
+                (color.startswith("#") and len(color) == 7)
+                or color in ["1", "2", "3", "4", "5", "6"]
             ):
                 raise InvalidNodeError(
                     "Color must be a hex code (#RRGGBB) or preset number (1-6)"
@@ -91,7 +91,7 @@ class TextNode(Node):
         width: int,
         height: int,
         text: str,
-        color: Optional[str] = None
+        color: Optional[str] = None,
     ) -> None:
         """Initialize a text node.
 
@@ -131,7 +131,7 @@ class FileNode(Node):
         height: int,
         file: str,
         subpath: Optional[str] = None,
-        color: Optional[str] = None
+        color: Optional[str] = None,
     ) -> None:
         """Initialize a file node.
 
@@ -176,7 +176,7 @@ class LinkNode(Node):
         width: int,
         height: int,
         url: str,
-        color: Optional[str] = None
+        color: Optional[str] = None,
     ) -> None:
         """Initialize a link node.
 
@@ -217,7 +217,7 @@ class GroupNode(Node):
         label: Optional[str] = None,
         background: Optional[str] = None,
         background_style: Optional[Literal["cover", "ratio", "repeat"]] = None,
-        color: Optional[str] = None
+        color: Optional[str] = None,
     ) -> None:
         """Initialize a group node.
 

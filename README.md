@@ -1,221 +1,138 @@
 # JSON Canvas MCP Server
 
-A Model Context Protocol (MCP) server implementation that provides tools for working with JSON Canvas files according to the [official specification](https://jsoncanvas.org/spec/1.0/). This server enables creating, modifying, and validating infinite canvas data structures.
+A [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server for working with
+[JSON Canvas](https://jsoncanvas.org/spec/1.0/) files — the open infinite-canvas format used
+by [Obsidian](https://obsidian.md/blog/json-canvas/). It lets an MCP client create, validate,
+read, and list `.canvas` files.
 
-## Overview
-
-The JSON Canvas MCP server provides a complete implementation of the JSON Canvas 1.0 specification, enabling:
-
-- Creation and manipulation of infinite canvas data
-- Support for all node types (text, file, link, group)
-- Edge connections with styling and labels
-- Validation against the specification
-- Configurable output paths
+Built on the official `mcp` Python SDK (`>=1.27`), which negotiates the **2025-11-25** MCP
+protocol revision. Runs over **stdio** by default and optionally over the **Streamable HTTP**
+transport.
 
 ## Components
 
-### Resources
-
-The server exposes the following resources:
-
-- `canvas://schema`: JSON Schema for validating canvas files
-- `canvas://examples`: Example canvas files demonstrating different features
-- `canvas://templates`: Templates for creating new canvases
-
 ### Tools
 
-#### Node Operations
+- **create_canvas** — Create a canvas from `nodes` (and optional `edges`) and write it to a
+  date-prefixed `.canvas` file under `OUTPUT_PATH`.
+  - Input: `nodes` (array of JSON Canvas node objects), `filename` (string, no extension),
+    `edges` (optional array of edge objects).
+  - Returns (structured): `{ path, node_count, edge_count }`.
+- **validate_canvas** — Validate canvas data against the JSON Canvas 1.0 specification.
+  - Input: `canvas` (object with optional `nodes` and `edges`).
+  - Returns (structured): `{ valid, error }`.
+- **read_canvas** — Read a stored `.canvas` file and return its JSON text.
+  - Input: `filename` (string, with or without the `.canvas` extension).
+- **list_canvases** — List the `.canvas` files available in `OUTPUT_PATH`.
+  - Returns: array of filenames.
 
-- **create_node**
-  - Create a new node of any supported type
-  - Input:
-    - `type` (string): Node type ("text", "file", "link", "group")
-    - `properties` (object): Node-specific properties
-      - Common: `id`, `x`, `y`, `width`, `height`, `color`
-      - Type-specific: `text`, `file`, `url`, etc.
-  - Returns: Created node object
+Node objects use the JSON Canvas shape: `id`, `type` (`text` | `file` | `link` | `group`),
+`x`, `y`, `width`, `height`, optional `color`, plus type-specific fields (`text`, `file`/`subpath`,
+`url`, `label`/`background`/`backgroundStyle`). Edge objects use `id`, `fromNode`, `toNode`, and
+optional `fromSide`/`toSide`/`fromEnd`/`toEnd`/`color`/`label`.
 
-- **update_node**
-  - Update an existing node's properties
-  - Input:
-    - `id` (string): Node ID to update
-    - `properties` (object): Properties to update
-  - Returns: Updated node object
+### Resources
 
-- **delete_node**
-  - Remove a node and its connected edges
-  - Input:
-    - `id` (string): Node ID to delete
-  - Returns: Success confirmation
-
-#### Edge Operations
-
-- **create_edge**
-  - Create a new edge between nodes
-  - Input:
-    - `id` (string): Unique edge identifier
-    - `fromNode` (string): Source node ID
-    - `toNode` (string): Target node ID
-    - `fromSide` (optional string): Start side ("top", "right", "bottom", "left")
-    - `toSide` (optional string): End side
-    - `color` (optional string): Edge color
-    - `label` (optional string): Edge label
-  - Returns: Created edge object
-
-- **update_edge**
-  - Update an existing edge's properties
-  - Input:
-    - `id` (string): Edge ID to update
-    - `properties` (object): Properties to update
-  - Returns: Updated edge object
-
-- **delete_edge**
-  - Remove an edge
-  - Input:
-    - `id` (string): Edge ID to delete
-  - Returns: Success confirmation
-
-#### Canvas Operations
-
-- **validate_canvas**
-  - Validate a canvas against the specification
-  - Input:
-    - `canvas` (object): Canvas data to validate
-  - Returns: Validation results with any errors
-
-- **export_canvas**
-  - Export canvas to different formats
-  - Input:
-    - `format` (string): Target format ("json", "svg", "png")
-    - `canvas` (object): Canvas data to export
-  - Returns: Exported canvas in requested format
+- `canvas://schema` — JSON Schema for validating canvas files.
+- `canvas://examples/basic` — A simple example canvas (two text nodes joined by an edge).
 
 ## Usage with Claude Desktop
 
-### Docker
+### Docker (stdio)
 
-Add this to your `claude_desktop_config.json`:
+```bash
+docker build -t mcp/jsoncanvas .
+```
+
+Add to your `claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "jsoncanvas": {
       "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-v",
-        "canvas-data:/data",
-        "mcp/jsoncanvas"
-      ],
-      "env": {
-        "OUTPUT_PATH": "/data/output"
-      }
+      "args": ["run", "-i", "--rm", "-v", "canvas-data:/data", "mcp/jsoncanvas"],
+      "env": { "OUTPUT_PATH": "/data/output" }
     }
   }
 }
 ```
 
-### UV
+### uv (stdio)
 
 ```json
 {
   "mcpServers": {
     "jsoncanvas": {
       "command": "uv",
-      "args": [
-        "--directory",
-        "/path/to/jsoncanvas",
-        "run",
-        "mcp-server-jsoncanvas"
-      ],
-      "env": {
-        "OUTPUT_PATH": "./output"
-      }
+      "args": ["--directory", "/path/to/jsoncanvas", "run", "mcp-server-jsoncanvas"],
+      "env": { "OUTPUT_PATH": "./output" }
     }
   }
 }
 ```
 
+## Streamable HTTP transport
+
+To serve over Streamable HTTP instead of stdio:
+
+```bash
+mcp-server-jsoncanvas --transport streamable-http --host 127.0.0.1 --port 8000
+```
+
+The MCP endpoint is then `http://127.0.0.1:8000/mcp`. The transport binds to localhost and, per
+the 2025-11-25 spec, validates the `Origin` header with DNS-rebinding protection enabled
+(localhost Origins only by default). To accept connections from outside the host (e.g. when
+running the container with HTTP), bind `--host 0.0.0.0` and configure your allowed Origins
+accordingly.
+
 ## Configuration
 
-The server can be configured using environment variables:
+Environment variables:
 
-- `OUTPUT_PATH`: Directory where canvas files will be saved (default: "./output")
-- `FORMAT`: Default output format for canvas files (default: "json")
+- `OUTPUT_PATH` — Directory where `.canvas` files are written/read (default `./output`).
+- `MCP_TRANSPORT` — `stdio` (default) or `streamable-http`.
+- `MCP_HOST` / `MCP_PORT` — Host/port for the Streamable HTTP transport (default `127.0.0.1:8000`).
 
-## Building
-
-### Docker Build
-
-```bash
-docker build -t mcp/jsoncanvas .
-```
-
-### Local Build
+## Development
 
 ```bash
-# Install uv if not already installed
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Create virtual environment and install dependencies
-uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-uv pip install -e .
-
-# Run tests
-pytest
+# Install uv: https://docs.astral.sh/uv/getting-started/installation/
+make setup        # uv venv && uv sync --extra dev
+make test         # run the test suite
+make lint         # ruff check + format check
+make audit        # scan dependencies for known vulnerabilities (pip-audit)
+make run          # run the server over stdio
 ```
 
-## Example Usage
+Run the bundled library example:
 
-### Creating a Canvas
+```bash
+make example      # writes example.canvas to OUTPUT_PATH (default ./output)
+```
+
+## Library example
+
+The `jsoncanvas` package can also be used directly:
 
 ```python
 from jsoncanvas import Canvas, TextNode, Edge
 
-# Create nodes
-title = TextNode(
-    id="title",
-    x=100,
-    y=100,
-    width=400,
-    height=100,
-    text="# Hello Canvas\n\nThis is a demonstration.",
-    color="#4285F4"
-)
+title = TextNode(id="title", x=100, y=100, width=400, height=100,
+                 text="# Hello Canvas", color="#4285F4")
+info = TextNode(id="info", x=600, y=100, width=300, height=100,
+                text="More information here", color="2")  # preset color
 
-info = TextNode(
-    id="info",
-    x=600,
-    y=100,
-    width=300,
-    height=100,
-    text="More information here",
-    color="2"  # Using preset color
-)
-
-# Create canvas
 canvas = Canvas()
 canvas.add_node(title)
 canvas.add_node(info)
+canvas.add_edge(Edge(id="edge1", from_node="title", to_node="info",
+                     from_side="right", to_side="left", label="Connection"))
 
-# Connect nodes
-edge = Edge(
-    id="edge1",
-    from_node="title",
-    to_node="info",
-    from_side="right",
-    to_side="left",
-    label="Connection"
-)
-canvas.add_edge(edge)
-
-# Save canvas
-canvas.save("example.canvas")
+import json
+print(json.dumps(canvas.to_dict(), indent=2))
 ```
 
 ## License
 
-This MCP server is licensed under the MIT License. This means you are free to use, modify, and distribute the software, subject to the terms and conditions of the MIT License. For more details, please see the LICENSE file in the project repository.
+MIT. See [LICENSE](LICENSE).

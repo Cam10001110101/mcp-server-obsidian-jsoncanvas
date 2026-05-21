@@ -1,0 +1,17 @@
+.git
+.github
+.venv
+.vscode
+.context
+output
+EXAMPLE OUTPUT
+tests
+examples
+**/__pycache__
+*.pyc
+.pytest_cache
+.coverage
+htmlcov
+dist
+build
+*.egg-info

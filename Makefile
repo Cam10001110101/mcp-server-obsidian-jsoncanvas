@@ -1,29 +1,38 @@
-.PHONY: setup test lint format clean
+.PHONY: setup test lint format run example audit clean
 
-# Create virtual environment and install dependencies
+# Create virtual environment and install dependencies (incl. dev extras)
 setup:
 	uv venv
-	uv pip install -r requirements.txt
-	uv pip install -e ".[dev]"
+	uv sync --extra dev
 
 # Run tests
 test:
-	pytest
+	uv run pytest
 
 # Run linting
 lint:
-	black --check jsoncanvas tests examples
-	isort --check jsoncanvas tests examples
-	mypy jsoncanvas tests examples
+	uv run ruff check .
+	uv run ruff format --check .
 
 # Format code
 format:
-	black jsoncanvas tests examples
-	isort jsoncanvas tests examples
+	uv run ruff format .
+	uv run ruff check --fix .
 
-# Run example
+# Run the MCP server (stdio). Use ARGS=... to pass flags, e.g.
+#   make run ARGS="--transport streamable-http"
+run:
+	uv run mcp-server-jsoncanvas $(ARGS)
+
+# Run the library example
 example:
-	python examples/create_canvas.py
+	uv run python examples/create_canvas.py
+
+# Audit dependencies for known vulnerabilities.
+# PYSEC-2025-183 (CVE-2025-45768) is a disputed pyjwt advisory with no fix; pyjwt
+# is only reachable via mcp's optional OAuth path, which this server does not use.
+audit:
+	uv run --with pip-audit pip-audit --ignore-vuln PYSEC-2025-183
 
 # Clean up generated files
 clean:

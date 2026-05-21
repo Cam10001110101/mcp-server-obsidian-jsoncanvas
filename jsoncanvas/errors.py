@@ -6,6 +6,7 @@ from typing import Any, Optional
 
 class ErrorCode(IntEnum):
     """Standard JSON-RPC error codes and custom error codes."""
+
     # Standard JSON-RPC error codes
     PARSE_ERROR = -32700
     INVALID_REQUEST = -32600
@@ -25,10 +26,7 @@ class McpError(Exception):
     """Base class for MCP errors."""
 
     def __init__(
-        self,
-        code: ErrorCode,
-        message: str,
-        data: Optional[Any] = None
+        self, code: ErrorCode, message: str, data: Optional[Any] = None
     ) -> None:
         """Initialize MCP error.
 
@@ -48,10 +46,7 @@ class McpError(Exception):
         Returns:
             Dictionary representation of the error
         """
-        error_dict = {
-            "code": self.code,
-            "message": self.message
-        }
+        error_dict = {"code": self.code, "message": self.message}
         if self.data is not None:
             error_dict["data"] = self.data
         return error_dict
