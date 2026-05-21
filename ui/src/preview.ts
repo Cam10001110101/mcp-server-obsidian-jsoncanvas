@@ -30,6 +30,9 @@ const sample: CanvasDocument = {
   ],
 };
 
-renderCanvas(document.getElementById("root") as HTMLElement, sample, {
+// No MCP host here to drive the iframe height, so fill the page directly.
+const previewRoot = document.getElementById("root") as HTMLElement;
+previewRoot.style.height = "100vh";
+renderCanvas(previewRoot, sample, {
   onOpenLink: (url) => window.open(url, "_blank"),
 });

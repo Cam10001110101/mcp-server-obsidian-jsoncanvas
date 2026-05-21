@@ -46,9 +46,27 @@ export interface CanvasDocument {
 export interface RenderOptions {
   /** Called when a link node or in-content link is activated. */
   onOpenLink?: (url: string) => void;
+  /** When provided, an Expand/Collapse button is shown that calls this. */
+  onToggleFullscreen?: () => void;
+  /** Current host display mode, used to label the Expand/Collapse button. */
+  displayMode?: string;
+}
+
+/** Handle returned by {@link renderCanvas} so callers can resize/inspect it. */
+export interface CanvasController {
+  /** Re-run fit-to-view (e.g. after the container is resized). */
+  refit(): void;
+  /** Natural width of the canvas bounding box (with padding), in canvas units. */
+  readonly worldWidth: number;
+  /** Natural height of the canvas bounding box (with padding), in canvas units. */
+  readonly worldHeight: number;
 }
 
 const SVG_NS = "http://www.w3.org/2000/svg";
+
+// Cap fit scale so small canvases grow to fill the viewport (instead of only
+// ever shrinking) without blowing tiny canvases up to absurd sizes.
+const FIT_MAX_SCALE = 1.75;
 
 // JSON Canvas preset colours 1-6 (Obsidian palette). Hex colours pass through.
 const PRESET: Record<string, string> = {
@@ -115,7 +133,7 @@ export function renderCanvas(
   root: HTMLElement,
   doc: CanvasDocument,
   options: RenderOptions = {},
-): void {
+): CanvasController {
   const nodes = doc.nodes ?? [];
   const edges = doc.edges ?? [];
 
@@ -127,7 +145,7 @@ export function renderCanvas(
     empty.className = "jc-empty";
     empty.textContent = "This canvas has no nodes.";
     root.appendChild(empty);
-    return;
+    return { refit() {}, worldWidth: 800, worldHeight: 300 };
   }
 
   // World bounding box (with padding) across all nodes.
@@ -301,7 +319,7 @@ export function renderCanvas(
   function fit() {
     const r = viewport.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) return;
-    scale = Math.min(1, Math.min(r.width / worldW, r.height / worldH)) || 1;
+    scale = Math.min(FIT_MAX_SCALE, Math.min(r.width / worldW, r.height / worldH)) || 1;
     tx = (r.width - worldW * scale) / 2;
     ty = (r.height - worldH * scale) / 2;
     apply();
@@ -358,9 +376,10 @@ export function renderCanvas(
   viewport.addEventListener("pointerup", endDrag);
   viewport.addEventListener("pointercancel", endDrag);
 
-  // --- Fit control ---
+  // --- Controls ---
   const controls = document.createElement("div");
   controls.className = "jc-controls";
+
   const fitBtn = document.createElement("button");
   fitBtn.type = "button";
   fitBtn.textContent = "Fit";
@@ -369,5 +388,16 @@ export function renderCanvas(
     fit();
   });
   controls.appendChild(fitBtn);
+
+  if (options.onToggleFullscreen) {
+    const fsBtn = document.createElement("button");
+    fsBtn.type = "button";
+    fsBtn.textContent = options.displayMode === "fullscreen" ? "Collapse" : "Expand";
+    fsBtn.addEventListener("click", () => options.onToggleFullscreen!());
+    controls.appendChild(fsBtn);
+  }
+
   root.appendChild(controls);
+
+  return { refit: fit, worldWidth: worldW, worldHeight: worldH };
 }
