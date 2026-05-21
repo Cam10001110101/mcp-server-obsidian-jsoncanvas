@@ -16,8 +16,8 @@ license = {text = "MIT"}
 mcp-server-jsoncanvas = "jsoncanvas.server:main"
 
 [project.urls]
-Homepage = "https://github.com/Cam10001110101/mcp-server-obsidian-jsoncanvas"
-Repository = "https://github.com/Cam10001110101/mcp-server-obsidian-jsoncanvas.git"
+Homepage = "https://github.com/Cam10001110101/obsidian-jsoncanvas"
+Repository = "https://github.com/Cam10001110101/obsidian-jsoncanvas.git"
 
 [build-system]
 requires = ["hatchling"]

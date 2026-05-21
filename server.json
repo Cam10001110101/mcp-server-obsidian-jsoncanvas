@@ -5,7 +5,7 @@
   "description": "Create, validate, read, edit, export, and search JSON Canvas (.canvas) files.",
   "version": "0.2.0",
   "repository": {
-    "url": "https://github.com/Cam10001110101/mcp-server-obsidian-jsoncanvas",
+    "url": "https://github.com/Cam10001110101/obsidian-jsoncanvas",
     "source": "github"
   },
   "packages": [
@@ -47,7 +47,7 @@
     },
     {
       "registryType": "oci",
-      "identifier": "ghcr.io/cam10001110101/mcp-server-obsidian-jsoncanvas",
+      "identifier": "ghcr.io/cam10001110101/obsidian-jsoncanvas",
       "version": "0.2.0",
       "transport": { "type": "stdio" },
       "environmentVariables": [
