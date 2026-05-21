@@ -59,3 +59,41 @@ def test_empty_canvas_is_valid():
     canvas = Canvas.from_dict({})
     assert canvas.nodes == []
     assert canvas.edges == []
+
+
+def test_update_node_replaces_in_place_and_keeps_edges():
+    canvas = Canvas()
+    canvas.add_node(_node("a"))
+    canvas.add_node(_node("b"))
+    canvas.add_edge(Edge(id="e", from_node="a", to_node="b"))
+
+    old = canvas.update_node(
+        TextNode(id="a", x=5, y=5, width=20, height=20, text="new", color="4")
+    )
+    assert old.text == "a"
+    assert canvas.get_node("a").text == "new"
+    assert canvas.get_node("a").color == "4"
+    # Edge survives (unlike remove_node, which cascades).
+    assert len(canvas.edges) == 1
+
+
+def test_update_node_unknown_id_raises():
+    canvas = Canvas()
+    canvas.add_node(_node("a"))
+    with pytest.raises(ReferenceError):
+        canvas.update_node(_node("missing"))
+
+
+def test_update_edge_replaces_and_validates_references():
+    canvas = Canvas()
+    canvas.add_node(_node("a"))
+    canvas.add_node(_node("b"))
+    canvas.add_edge(Edge(id="e", from_node="a", to_node="b"))
+
+    canvas.update_edge(Edge(id="e", from_node="a", to_node="b", label="link"))
+    assert canvas.get_edge("e").label == "link"
+
+    with pytest.raises(ReferenceError):
+        canvas.update_edge(Edge(id="e", from_node="a", to_node="ghost"))
+    with pytest.raises(ReferenceError):
+        canvas.update_edge(Edge(id="missing", from_node="a", to_node="b"))
