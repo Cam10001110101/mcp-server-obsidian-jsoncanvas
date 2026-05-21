@@ -2,6 +2,7 @@
 
 from typing import Dict, Literal, Optional
 
+from ._colors import is_valid_color
 from .errors import InvalidEdgeError
 
 
@@ -71,14 +72,10 @@ class Edge:
         Raises:
             InvalidEdgeError: If the color is invalid
         """
-        if color is not None:
-            if not (
-                (color.startswith("#") and len(color) == 7)
-                or color in ["1", "2", "3", "4", "5", "6"]
-            ):
-                raise InvalidEdgeError(
-                    "Color must be a hex code (#RRGGBB) or preset number (1-6)"
-                )
+        if color is not None and not is_valid_color(color):
+            raise InvalidEdgeError(
+                "Color must be a hex code (#RRGGBB) or preset number (1-6)"
+            )
 
     def to_dict(self) -> Dict:
         """Convert edge to dictionary representation.

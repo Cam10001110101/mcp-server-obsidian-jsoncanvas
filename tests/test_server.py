@@ -242,6 +242,49 @@ async def test_edit_canvas_ui_meta_and_rerender(_output_dir):
         assert node_a["text"] == "changed"
 
 
+def test_edit_canvas_type_change_swaps_fields(_output_dir):
+    name = _seed_two_node_canvas()
+    # Changing a node's type to "link" (supplying the new type's fields) replaces
+    # it cleanly; the old text field is dropped rather than crashing the new
+    # constructor.
+    result = edit_canvas(
+        filename=name,
+        update_nodes=[
+            {
+                "id": "a",
+                "type": "link",
+                "x": 0,
+                "y": 0,
+                "width": 100,
+                "height": 50,
+                "url": "https://example.com",
+            }
+        ],
+    )
+    node_a = next(n for n in result.canvas.nodes if n["id"] == "a")
+    assert node_a["type"] == "link"
+    assert node_a["url"] == "https://example.com"
+    assert "text" not in node_a  # stale field from the old text node is gone
+
+
+def test_edit_canvas_type_change_missing_fields_raises_value_error(_output_dir):
+    name = _seed_two_node_canvas()
+    # A type change without the new type's required fields fails with a clear
+    # ValueError (not a raw TypeError leaking from the constructor).
+    with pytest.raises(ValueError):
+        edit_canvas(filename=name, update_nodes=[{"id": "a", "type": "link"}])
+
+
+def test_validate_canvas_missing_field_is_friendly():
+    # text node missing its required "text" field
+    bad_node = {"id": "x", "type": "text", "x": 0, "y": 0, "width": 1, "height": 1}
+    result = validate_canvas({"nodes": [bad_node]})
+    assert result.valid is False
+    assert "missing required field" in result.error
+    assert "text" in result.error
+    assert "KeyError" not in result.error  # not a bare exception repr
+
+
 def test_export_canvas_markdown_and_svg(_output_dir):
     name = _seed_two_node_canvas()
     md = export_canvas(filename=name, format="markdown")

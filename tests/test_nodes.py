@@ -31,6 +31,28 @@ def test_invalid_color_raises(bad):
         TextNode(id="t", x=0, y=0, width=1, height=1, text="x", color=bad)
 
 
+@pytest.mark.parametrize(
+    "bad",
+    [
+        '#"/><g ',  # SVG-attribute breakout shaped, 7 chars, '#'-prefixed
+        "#zzzzzz",  # 7 chars, non-hex
+        "# fffff",  # 7 chars, contains a space
+        '#"onx="',  # 7 chars, quote + attribute-ish
+    ],
+)
+def test_non_hex_seven_char_color_rejected(bad):
+    # Previously len==7 + startswith('#') passed; the strict hex rule now rejects
+    # these so they can never reach the (unescaped-by-design) SVG export.
+    assert len(bad) == 7 and bad.startswith("#")
+    with pytest.raises(InvalidNodeError):
+        TextNode(id="t", x=0, y=0, width=1, height=1, text="x", color=bad)
+
+
+def test_hex_color_accepts_upper_and_lower_case():
+    for good in ("#ABCDEF", "#abcdef", "#012345"):
+        assert TextNode(id="t", x=0, y=0, width=1, height=1, text="x", color=good)
+
+
 def test_file_node_subpath_must_start_with_hash():
     with pytest.raises(InvalidNodeError):
         FileNode(id="f", x=0, y=0, width=1, height=1, file="a.md", subpath="nope")

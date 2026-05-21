@@ -83,6 +83,15 @@ function resolveColor(c: string | undefined, fallback: string): string {
   return PRESET[c] ?? c;
 }
 
+// Only http(s) and mailto URLs are safe to assign to an href or hand to the
+// host. This blocks javascript:/data:/etc. from canvas-supplied URLs (which are
+// attacker/agent-controlled). Returns the URL when safe, otherwise null.
+const SAFE_URL_SCHEME = /^(?:https?:|mailto:)/i;
+function safeHref(url: string | undefined): string | null {
+  if (!url) return null;
+  return SAFE_URL_SCHEME.test(url.trim()) ? url : null;
+}
+
 marked.use({ breaks: true, gfm: true });
 
 function renderMarkdown(text: string): string {
@@ -233,11 +242,12 @@ export function renderCanvas(
     } else if (n.type === "link") {
       const a = document.createElement("a");
       a.className = "jc-link";
-      a.href = n.url ?? "#";
+      const href = safeHref(n.url);
+      a.href = href ?? "#";
       a.textContent = n.url ?? "";
       a.addEventListener("click", (e) => {
         e.preventDefault();
-        if (n.url) options.onOpenLink?.(n.url);
+        if (href) options.onOpenLink?.(href);
       });
       el.appendChild(a);
     } else {
@@ -249,12 +259,13 @@ export function renderCanvas(
     layer.appendChild(el);
   }
 
-  // Route in-content links (from markdown) through the host.
+  // Route in-content links (from markdown) through the host. DOMPurify has
+  // already stripped dangerous schemes; safeHref is the belt-and-braces check.
   layer.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
     const a = target.closest("a");
-    const href = a?.getAttribute("href");
-    if (href && /^https?:/i.test(href)) {
+    const href = safeHref(a?.getAttribute("href") ?? undefined);
+    if (href) {
       e.preventDefault();
       options.onOpenLink?.(href);
     }

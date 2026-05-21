@@ -65,3 +65,30 @@ def test_to_svg_escapes_text():
 def test_to_svg_empty_canvas():
     svg = to_svg(Canvas())
     assert svg.startswith("<svg") and "Empty canvas" in svg
+
+
+def test_to_svg_escapes_color_as_backstop():
+    # The model rejects non-hex colours, but to_svg escapes colour values too, so
+    # a value that somehow bypassed validation cannot break out of an attribute.
+    canvas = Canvas()
+    node = TextNode(id="x", x=0, y=0, width=200, height=80, text="hi")
+    node.color = '#"><script>alert(1)</script>'  # bypass __init__ validation
+    canvas.add_node(node)
+    svg = to_svg(canvas)
+    assert "<script>" not in svg  # raw breakout must not appear
+    assert "&quot;" in svg and "&lt;script&gt;" in svg  # escaped instead
+
+
+def test_to_markdown_deep_chain_does_not_recurse():
+    # A long edge chain must not blow the Python recursion limit (the DFS is
+    # iterative). 5000 >> sys.getrecursionlimit() (~1000).
+    n = 5000
+    nodes = [
+        TextNode(id=f"n{i}", x=0, y=i * 10, width=10, height=10, text=f"node {i}")
+        for i in range(n)
+    ]
+    edges = [
+        Edge(id=f"e{i}", from_node=f"n{i}", to_node=f"n{i + 1}") for i in range(n - 1)
+    ]
+    md = to_markdown(Canvas(nodes=nodes, edges=edges))
+    assert "## node 0" in md and f"## node {n - 1}" in md

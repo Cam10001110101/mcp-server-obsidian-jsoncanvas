@@ -50,7 +50,12 @@ let controller: CanvasController | null = null;
 let displayMode = "inline";
 let fullscreenAvailable = false;
 
-const onOpenLink = (url: string) => void app.openLink({ url });
+// Defence-in-depth at the host boundary: render.ts already filters schemes, but
+// re-check before forwarding a URL to the host so only http(s)/mailto get through.
+const SAFE_URL_SCHEME = /^(?:https?:|mailto:)/i;
+const onOpenLink = (url: string) => {
+  if (SAFE_URL_SCHEME.test(url.trim())) void app.openLink({ url });
+};
 
 function clamp(value: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, value));

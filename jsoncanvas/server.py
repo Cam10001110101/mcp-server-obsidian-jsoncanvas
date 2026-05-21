@@ -189,7 +189,10 @@ def _node_from_dict(node_data: dict[str, Any]):
     # JSON Canvas uses camelCase "backgroundStyle"; the model expects snake_case.
     if node_type == "group" and "backgroundStyle" in data:
         data["background_style"] = data.pop("backgroundStyle")
-    return node_cls(**data)
+    try:
+        return node_cls(**data)
+    except TypeError as exc:  # missing required / unexpected fields for this type
+        raise ValueError(f"Invalid fields for {node_type!r} node: {exc}") from exc
 
 
 def _build_canvas(
@@ -355,7 +358,14 @@ def edit_canvas(
         existing = canvas.get_node(node_id) if node_id else None
         if existing is None:
             raise ValueError(f"No node with id {node_id!r} to update")
-        canvas.update_node(_node_from_dict({**existing.to_dict(), **patch}))
+        # A patch merges onto the existing node, preserving its type. Changing the
+        # type must supply a complete node — merging would carry the old type's
+        # fields (e.g. "text") into the new type's constructor and fail.
+        if "type" in patch and patch["type"] != existing.type:
+            merged = patch
+        else:
+            merged = {**existing.to_dict(), **patch}
+        canvas.update_node(_node_from_dict(merged))
 
     for edge_data in add_edges or []:
         canvas.add_edge(Edge.from_dict(edge_data))

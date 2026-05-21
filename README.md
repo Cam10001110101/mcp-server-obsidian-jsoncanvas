@@ -133,6 +133,14 @@ read the `mcp-session-id` response header, so the Streamable HTTP transport serv
 CORS headers. Restrict the allowed origins with `MCP_CORS_ORIGINS` (comma-separated; default
 `*`).
 
+> **Security note.** The HTTP transport is **unauthenticated** — anyone who can reach the port
+> can read and write `.canvas` files under `OUTPUT_PATH`. The server is intended for local use;
+> keep it bound to `127.0.0.1` (the default). DNS-rebinding/`Origin` protection is fixed to
+> localhost Origins and Hosts at startup, so binding `--host 0.0.0.0` exposes the port on the
+> network but still rejects non-localhost `Host`/`Origin` headers — to safely expose it remotely,
+> front it with an authenticating reverse proxy rather than publishing it directly, and set
+> `MCP_CORS_ORIGINS` to the specific origins you trust (never `*`).
+
 ## Configuration
 
 Environment variables:
