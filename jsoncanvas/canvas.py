@@ -19,8 +19,9 @@ class Canvas:
             nodes: Optional list of nodes
             edges: Optional list of edges
         """
-        self.nodes = nodes or []
-        self.edges = edges or []
+        # Copy so later add/remove operations never mutate the caller's lists.
+        self.nodes = list(nodes) if nodes else []
+        self.edges = list(edges) if edges else []
         self._validate_ids()
         self._validate_edge_references()
 
@@ -259,65 +260,79 @@ class Canvas:
         nodes = []
         edges = []
 
-        # Parse nodes
+        # Parse nodes. Missing required keys surface as a friendly ValidationError
+        # (rather than a bare KeyError) so callers like validate_canvas can report
+        # which field is absent.
         for node_data in data.get("nodes", []):
             node_type = node_data.get("type")
-            if node_type == "text":
-                nodes.append(
-                    TextNode(
-                        id=node_data["id"],
-                        x=node_data["x"],
-                        y=node_data["y"],
-                        width=node_data["width"],
-                        height=node_data["height"],
-                        text=node_data["text"],
-                        color=node_data.get("color"),
+            try:
+                if node_type == "text":
+                    nodes.append(
+                        TextNode(
+                            id=node_data["id"],
+                            x=node_data["x"],
+                            y=node_data["y"],
+                            width=node_data["width"],
+                            height=node_data["height"],
+                            text=node_data["text"],
+                            color=node_data.get("color"),
+                        )
                     )
-                )
-            elif node_type == "file":
-                nodes.append(
-                    FileNode(
-                        id=node_data["id"],
-                        x=node_data["x"],
-                        y=node_data["y"],
-                        width=node_data["width"],
-                        height=node_data["height"],
-                        file=node_data["file"],
-                        subpath=node_data.get("subpath"),
-                        color=node_data.get("color"),
+                elif node_type == "file":
+                    nodes.append(
+                        FileNode(
+                            id=node_data["id"],
+                            x=node_data["x"],
+                            y=node_data["y"],
+                            width=node_data["width"],
+                            height=node_data["height"],
+                            file=node_data["file"],
+                            subpath=node_data.get("subpath"),
+                            color=node_data.get("color"),
+                        )
                     )
-                )
-            elif node_type == "link":
-                nodes.append(
-                    LinkNode(
-                        id=node_data["id"],
-                        x=node_data["x"],
-                        y=node_data["y"],
-                        width=node_data["width"],
-                        height=node_data["height"],
-                        url=node_data["url"],
-                        color=node_data.get("color"),
+                elif node_type == "link":
+                    nodes.append(
+                        LinkNode(
+                            id=node_data["id"],
+                            x=node_data["x"],
+                            y=node_data["y"],
+                            width=node_data["width"],
+                            height=node_data["height"],
+                            url=node_data["url"],
+                            color=node_data.get("color"),
+                        )
                     )
-                )
-            elif node_type == "group":
-                nodes.append(
-                    GroupNode(
-                        id=node_data["id"],
-                        x=node_data["x"],
-                        y=node_data["y"],
-                        width=node_data["width"],
-                        height=node_data["height"],
-                        label=node_data.get("label"),
-                        background=node_data.get("background"),
-                        background_style=node_data.get("backgroundStyle"),
-                        color=node_data.get("color"),
+                elif node_type == "group":
+                    nodes.append(
+                        GroupNode(
+                            id=node_data["id"],
+                            x=node_data["x"],
+                            y=node_data["y"],
+                            width=node_data["width"],
+                            height=node_data["height"],
+                            label=node_data.get("label"),
+                            background=node_data.get("background"),
+                            background_style=node_data.get("backgroundStyle"),
+                            color=node_data.get("color"),
+                        )
                     )
-                )
-            else:
-                raise ValidationError(f"Invalid node type: {node_type}")
+                else:
+                    raise ValidationError(f"Invalid node type: {node_type}")
+            except KeyError as exc:
+                node_id = node_data.get("id", "<unknown>")
+                raise ValidationError(
+                    f"Node {node_id!r} is missing required field {exc.args[0]!r}"
+                ) from exc
 
         # Parse edges
         for edge_data in data.get("edges", []):
-            edges.append(Edge.from_dict(edge_data))
+            try:
+                edges.append(Edge.from_dict(edge_data))
+            except KeyError as exc:
+                edge_id = edge_data.get("id", "<unknown>")
+                raise ValidationError(
+                    f"Edge {edge_id!r} is missing required field {exc.args[0]!r}"
+                ) from exc
 
         return cls(nodes=nodes, edges=edges)

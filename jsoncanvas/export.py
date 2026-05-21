@@ -27,9 +27,11 @@ _DEFAULT_STROKE = "#8a8f98"
 
 
 def _color(value: str | None, fallback: str = _DEFAULT_STROKE) -> str:
-    if not value:
-        return fallback
-    return _PRESET.get(value, value)
+    # Resolve presets, then escape: colours are interpolated into SVG attribute
+    # values, so this is the backstop layer behind ``is_valid_color`` (the model
+    # already rejects non-hex colours, making this a no-op for valid input).
+    raw = fallback if not value else _PRESET.get(value, value)
+    return _esc(raw)
 
 
 # --------------------------------------------------------------------------- #
@@ -93,13 +95,18 @@ def to_markdown(canvas: Canvas, title: str = "Canvas") -> str:
     order: list[str] = []
     seen: set[str] = set()
 
-    def visit(node_id: str) -> None:
-        if node_id in seen or node_id not in nodes_by_id:
-            return
-        seen.add(node_id)
-        order.append(node_id)
-        for target in children.get(node_id, []):
-            visit(target)
+    def visit(start: str) -> None:
+        # Iterative pre-order DFS (an explicit stack avoids RecursionError on
+        # long edge chains). Children are pushed in reverse so the leftmost is
+        # popped first, matching the previous recursive traversal order.
+        stack = [start]
+        while stack:
+            node_id = stack.pop()
+            if node_id in seen or node_id not in nodes_by_id:
+                continue
+            seen.add(node_id)
+            order.append(node_id)
+            stack.extend(reversed(children.get(node_id, [])))
 
     for root in roots:
         visit(root)

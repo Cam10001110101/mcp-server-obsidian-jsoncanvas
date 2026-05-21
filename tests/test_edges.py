@@ -43,3 +43,9 @@ def test_invalid_side_raises():
 def test_invalid_end_raises():
     with pytest.raises(InvalidEdgeError):
         Edge(id="e", from_node="a", to_node="b", to_end="circle")
+
+
+@pytest.mark.parametrize("bad", ['#"/><g ', "#zzzzzz", "# fffff"])
+def test_non_hex_seven_char_color_rejected(bad):
+    with pytest.raises(InvalidEdgeError):
+        Edge(id="e", from_node="a", to_node="b", color=bad)
