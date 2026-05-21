@@ -2,9 +2,9 @@
 """MCP server for JSON Canvas files.
 
 Built on the FastMCP API of the official ``mcp`` SDK, which negotiates the
-2025-11-25 Model Context Protocol revision. Exposes four tools (create, validate,
-read, list) and two resources (schema, example) over either stdio (default) or
-the Streamable HTTP transport.
+2025-11-25 Model Context Protocol revision. Exposes seven tools (create, validate,
+read, list, edit, export, search) plus a canvas-viewer UI resource over either
+stdio (default) or the Streamable HTTP transport.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, Field
@@ -29,6 +29,7 @@ from jsoncanvas import (
     TextNode,
     __version__,
 )
+from jsoncanvas.export import to_markdown, to_svg
 
 
 # --------------------------------------------------------------------------- #
@@ -62,6 +63,32 @@ class ValidateCanvasResult(BaseModel):
     valid: bool = Field(description="True when the canvas conforms to the spec")
     error: str | None = Field(
         default=None, description="Validation error message when invalid"
+    )
+
+
+class ExportResult(BaseModel):
+    """Result of exporting a canvas to another format."""
+
+    format: str = Field(description="The export format (markdown or svg)")
+    mime_type: str = Field(description="MIME type of the exported content")
+    content: str = Field(description="The exported document text")
+
+
+class SearchMatch(BaseModel):
+    """A single search hit within a stored canvas."""
+
+    filename: str = Field(description="Canvas file the match was found in")
+    kind: str = Field(description="What matched: 'node' or 'edge'")
+    id: str = Field(description="ID of the matching node or edge")
+    field: str = Field(description="Field the query matched (e.g. text, label, url)")
+    snippet: str = Field(description="The matching value")
+
+
+class SearchResult(BaseModel):
+    """Result of searching across stored canvases."""
+
+    matches: list[SearchMatch] = Field(
+        default_factory=list, description="Matching nodes and edges"
     )
 
 
@@ -152,24 +179,37 @@ def _load_ui_html() -> str:
         ) from exc
 
 
+def _node_from_dict(node_data: dict[str, Any]):
+    """Build a single node from a JSON Canvas node dict (validates fields)."""
+    data = dict(node_data)  # copy so caller input is not mutated
+    node_type = data.pop("type", None)
+    node_cls = _NODE_TYPES.get(node_type)
+    if node_cls is None:
+        raise ValueError(f"Unknown node type: {node_type!r}")
+    # JSON Canvas uses camelCase "backgroundStyle"; the model expects snake_case.
+    if node_type == "group" and "backgroundStyle" in data:
+        data["background_style"] = data.pop("backgroundStyle")
+    return node_cls(**data)
+
+
 def _build_canvas(
     nodes: list[dict[str, Any]], edges: list[dict[str, Any]] | None
 ) -> Canvas:
     """Build and validate a :class:`Canvas` from JSON Canvas node/edge dicts."""
     canvas = Canvas()
     for node_data in nodes:
-        data = dict(node_data)  # copy so caller input is not mutated
-        node_type = data.pop("type", None)
-        node_cls = _NODE_TYPES.get(node_type)
-        if node_cls is None:
-            raise ValueError(f"Unknown node type: {node_type!r}")
-        # JSON Canvas uses camelCase "backgroundStyle"; the model expects snake_case.
-        if node_type == "group" and "backgroundStyle" in data:
-            data["background_style"] = data.pop("backgroundStyle")
-        canvas.add_node(node_cls(**data))
+        canvas.add_node(_node_from_dict(node_data))
     for edge_data in edges or []:
         canvas.add_edge(Edge.from_dict(edge_data))
     return canvas
+
+
+def _load_canvas(filename: str) -> tuple[Path, Canvas]:
+    """Load a stored canvas as a validated :class:`Canvas`, with its file path."""
+    target = _safe_target(filename)
+    if not target.is_file():
+        raise ValueError(f"Canvas not found: {target.name}")
+    return target, Canvas.from_dict(json.loads(target.read_text()))
 
 
 # --------------------------------------------------------------------------- #
@@ -265,6 +305,173 @@ def read_canvas(filename: str) -> CanvasDocument:
 def list_canvases() -> list[str]:
     """Return the names of ``.canvas`` files in the output directory."""
     return sorted(p.name for p in _output_dir().glob("*.canvas"))
+
+
+@mcp.tool(
+    title="Edit Canvas",
+    description=(
+        "Edit a stored .canvas file: add, update, and/or remove nodes and edges in "
+        "one atomic write. Operations apply in order — add_nodes, update_nodes, "
+        "add_edges, update_edges, remove_edge_ids, remove_node_ids — and removing a "
+        "node also removes its connected edges. If any operation fails the file is "
+        "left unchanged. Returns the updated canvas."
+    ),
+    meta=UI_TOOL_META,
+)
+def edit_canvas(
+    filename: str,
+    add_nodes: list[dict[str, Any]] | None = None,
+    update_nodes: list[dict[str, Any]] | None = None,
+    remove_node_ids: list[str] | None = None,
+    add_edges: list[dict[str, Any]] | None = None,
+    update_edges: list[dict[str, Any]] | None = None,
+    remove_edge_ids: list[str] | None = None,
+) -> CreateCanvasResult:
+    """Apply a batch of edits to a stored canvas and persist the result.
+
+    Changes are applied to an in-memory canvas and only written if every
+    operation succeeds, so a failed edit leaves the stored file untouched.
+
+    Args:
+        filename: Name of the canvas file under OUTPUT_PATH.
+        add_nodes: Full JSON Canvas node objects to add (``id``, ``type``, ``x``,
+            ``y``, ``width``, ``height`` plus type-specific fields).
+        update_nodes: Partial node objects to patch; each must include ``id``.
+            Fields are merged onto the existing node (its ``type`` is preserved
+            unless overridden — changing type requires the new type's fields).
+        remove_node_ids: Node IDs to remove (their connected edges are removed too).
+        add_edges: JSON Canvas edge objects to add (``id``, ``fromNode``, ``toNode``,
+            plus optional ``fromSide``/``toSide``/``color``/``label``).
+        update_edges: Partial edge objects to patch; each must include ``id``.
+        remove_edge_ids: Edge IDs to remove.
+    """
+    target, canvas = _load_canvas(filename)
+
+    for node_data in add_nodes or []:
+        canvas.add_node(_node_from_dict(node_data))
+
+    for patch in update_nodes or []:
+        node_id = patch.get("id")
+        existing = canvas.get_node(node_id) if node_id else None
+        if existing is None:
+            raise ValueError(f"No node with id {node_id!r} to update")
+        canvas.update_node(_node_from_dict({**existing.to_dict(), **patch}))
+
+    for edge_data in add_edges or []:
+        canvas.add_edge(Edge.from_dict(edge_data))
+
+    for patch in update_edges or []:
+        edge_id = patch.get("id")
+        existing = canvas.get_edge(edge_id) if edge_id else None
+        if existing is None:
+            raise ValueError(f"No edge with id {edge_id!r} to update")
+        canvas.update_edge(Edge.from_dict({**existing.to_dict(), **patch}))
+
+    for edge_id in remove_edge_ids or []:
+        if canvas.remove_edge(edge_id) is None:
+            raise ValueError(f"No edge with id {edge_id!r} to remove")
+
+    for node_id in remove_node_ids or []:
+        if canvas.remove_node(node_id) is None:
+            raise ValueError(f"No node with id {node_id!r} to remove")
+
+    canvas_dict = canvas.to_dict()
+    target.write_text(json.dumps(canvas_dict, indent=2))
+    print(f"Edited canvas {target}", file=sys.stderr)
+    return CreateCanvasResult(
+        path=str(target),
+        node_count=len(canvas.nodes),
+        edge_count=len(canvas.edges),
+        canvas=CanvasDocument(
+            nodes=canvas_dict.get("nodes", []),
+            edges=canvas_dict.get("edges", []),
+        ),
+    )
+
+
+@mcp.tool(
+    title="Export Canvas",
+    description=(
+        "Export a stored canvas to another format: 'markdown' (an outline that "
+        "follows the edges) or 'svg' (a standalone vector image). SVG renders each "
+        "node's title line only."
+    ),
+)
+def export_canvas(filename: str, format: Literal["markdown", "svg"]) -> ExportResult:
+    """Export a stored canvas to Markdown or SVG.
+
+    Args:
+        filename: Name of the canvas file under OUTPUT_PATH.
+        format: ``markdown`` or ``svg``.
+    """
+    _, canvas = _load_canvas(filename)
+    if format == "markdown":
+        return ExportResult(
+            format="markdown",
+            mime_type="text/markdown",
+            content=to_markdown(canvas, title=_safe_target(filename).stem),
+        )
+    return ExportResult(format="svg", mime_type="image/svg+xml", content=to_svg(canvas))
+
+
+# Fields searched per element kind (camelCase JSON keys).
+_NODE_SEARCH_FIELDS = ("text", "label", "file", "subpath", "url", "id")
+_EDGE_SEARCH_FIELDS = ("label", "id")
+_SNIPPET_MAX = 200
+
+
+def _snippet(value: str) -> str:
+    value = value.replace("\n", " ").strip()
+    return value if len(value) <= _SNIPPET_MAX else value[:_SNIPPET_MAX] + "…"
+
+
+@mcp.tool(
+    title="Search Canvases",
+    description=(
+        "Case-insensitive substring search across stored canvases. Matches node "
+        "text, labels, file paths, URLs, and IDs, plus edge labels. Searches every "
+        "canvas in OUTPUT_PATH unless a filename is given."
+    ),
+)
+def search_canvases(query: str, filename: str | None = None) -> SearchResult:
+    """Find nodes and edges whose text matches ``query``.
+
+    Args:
+        query: Case-insensitive substring to search for.
+        filename: Optional single canvas to restrict the search to (otherwise all).
+    """
+    if filename is not None:
+        targets = [_safe_target(filename)]
+    else:
+        targets = sorted(_output_dir().glob("*.canvas"))
+
+    needle = query.casefold()
+    matches: list[SearchMatch] = []
+    for target in targets:
+        if not target.is_file():
+            continue
+        try:
+            data = json.loads(target.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        for kind, fields in (
+            ("node", _NODE_SEARCH_FIELDS),
+            ("edge", _EDGE_SEARCH_FIELDS),
+        ):
+            for element in data.get(f"{kind}s", []):
+                for field in fields:
+                    value = element.get(field)
+                    if isinstance(value, str) and needle in value.casefold():
+                        matches.append(
+                            SearchMatch(
+                                filename=target.name,
+                                kind=kind,
+                                id=str(element.get("id", "")),
+                                field=field,
+                                snippet=_snippet(value),
+                            )
+                        )
+    return SearchResult(matches=matches)
 
 
 # --------------------------------------------------------------------------- #

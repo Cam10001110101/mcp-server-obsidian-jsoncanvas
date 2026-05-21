@@ -179,6 +179,55 @@ class Canvas:
 
         return self.edges.pop(edge_index)
 
+    def update_node(self, node: Node) -> Node:
+        """Replace an existing node with a node sharing the same ID.
+
+        Connected edges are left intact (unlike :meth:`remove_node`). The
+        replacement node is already validated by its constructor.
+
+        Args:
+            node: The replacement node (must match an existing node ID)
+
+        Returns:
+            The previous node that was replaced
+
+        Raises:
+            ReferenceError: If no node with the given ID exists
+        """
+        for i, existing in enumerate(self.nodes):
+            if existing.id == node.id:
+                self.nodes[i] = node
+                return existing
+        raise ReferenceError(f"No node with ID {node.id} to update")
+
+    def update_edge(self, edge: Edge) -> Edge:
+        """Replace an existing edge with an edge sharing the same ID.
+
+        Args:
+            edge: The replacement edge (must match an existing edge ID)
+
+        Returns:
+            The previous edge that was replaced
+
+        Raises:
+            ReferenceError: If no edge with the given ID exists, or the edge
+                references a non-existent node
+        """
+        node_ids = {n.id for n in self.nodes}
+        if edge.from_node not in node_ids:
+            raise ReferenceError(
+                f"Edge references non-existent from_node: {edge.from_node}"
+            )
+        if edge.to_node not in node_ids:
+            raise ReferenceError(
+                f"Edge references non-existent to_node: {edge.to_node}"
+            )
+        for i, existing in enumerate(self.edges):
+            if existing.id == edge.id:
+                self.edges[i] = edge
+                return existing
+        raise ReferenceError(f"No edge with ID {edge.id} to update")
+
     def to_dict(self) -> Dict:
         """Convert the canvas to a dictionary.
 

@@ -32,9 +32,22 @@ receiving the canvas as text/structured output.
     fallback is the canvas JSON).
 - **list_canvases** — List the `.canvas` files available in `OUTPUT_PATH`.
   - Returns: array of filenames.
+- **edit_canvas** — Add, update, and/or remove nodes and edges on a stored canvas in one
+  atomic write (a failed operation leaves the file unchanged).
+  - Input: `filename`, plus optional `add_nodes`, `update_nodes` (partial, must include `id`),
+    `remove_node_ids` (cascades connected edges), `add_edges`, `update_edges`, `remove_edge_ids`.
+  - Returns (structured): `{ path, node_count, edge_count, canvas }` — the updated canvas, so
+    UI-capable hosts re-render it inline.
+- **export_canvas** — Export a stored canvas to another format.
+  - Input: `filename`, `format` (`markdown` | `svg`).
+  - Returns (structured): `{ format, mime_type, content }`. Markdown is an edge-ordered outline;
+    SVG is a standalone vector image (node title lines only — plain SVG can't render Markdown).
+- **search_canvases** — Case-insensitive substring search across stored canvases.
+  - Input: `query`, optional `filename` to scope to one canvas.
+  - Returns (structured): `{ matches: [{ filename, kind, id, field, snippet }] }`.
 
-`create_canvas` and `read_canvas` are linked to the canvas viewer via `_meta.ui.resourceUri`,
-so UI-capable hosts render the result inline.
+`create_canvas`, `read_canvas`, and `edit_canvas` are linked to the canvas viewer via
+`_meta.ui.resourceUri`, so UI-capable hosts render the result inline.
 
 Node objects use the JSON Canvas shape: `id`, `type` (`text` | `file` | `link` | `group`),
 `x`, `y`, `width`, `height`, optional `color`, plus type-specific fields (`text`, `file`/`subpath`,
