@@ -1,0 +1,23 @@
+{
+  "name": "jsoncanvas-ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Inline canvas viewer (MCP Apps UI) for the JSON Canvas MCP server. Builds to ../jsoncanvas/_ui/viewer.html.",
+  "scripts": {
+    "build": "tsc --noEmit && vite build",
+    "dev": "vite",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.7.2",
+    "dompurify": "^3.4.5",
+    "marked": "^18.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.14",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}

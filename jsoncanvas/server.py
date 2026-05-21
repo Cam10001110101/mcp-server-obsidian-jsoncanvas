@@ -34,12 +34,26 @@ from jsoncanvas import (
 # --------------------------------------------------------------------------- #
 # Structured tool outputs (emitted as outputSchema + structured content)
 # --------------------------------------------------------------------------- #
+class CanvasDocument(BaseModel):
+    """A JSON Canvas document — the nodes and edges the UI viewer renders."""
+
+    nodes: list[dict[str, Any]] = Field(
+        default_factory=list, description="JSON Canvas node objects"
+    )
+    edges: list[dict[str, Any]] = Field(
+        default_factory=list, description="JSON Canvas edge objects"
+    )
+
+
 class CreateCanvasResult(BaseModel):
     """Result of writing a canvas to disk."""
 
     path: str = Field(description="Absolute path to the written .canvas file")
     node_count: int = Field(description="Number of nodes written")
     edge_count: int = Field(description="Number of edges written")
+    canvas: CanvasDocument = Field(
+        description="The full canvas document, for inline UI rendering"
+    )
 
 
 class ValidateCanvasResult(BaseModel):
@@ -76,6 +90,24 @@ _NODE_TYPES: dict[str, type] = {
     "group": GroupNode,
 }
 
+# --------------------------------------------------------------------------- #
+# MCP Apps UI extension
+# --------------------------------------------------------------------------- #
+# An interactive HTML viewer is exposed as a resource and linked from the
+# read/create tools via ``_meta``. Hosts that implement the MCP Apps UI
+# extension render it inline; text-only hosts ignore the metadata and fall back
+# to the tools' text/structured output. Constants mirror
+# ``@modelcontextprotocol/ext-apps`` (v1.7.x).
+UI_RESOURCE_URI = "ui://canvas/viewer.html"
+UI_MIME_TYPE = "text/html;profile=mcp-app"
+# Both keys are set for cross-host compatibility: ``ui.resourceUri`` is the
+# current convention; ``ui/resourceUri`` is the deprecated flat fallback.
+UI_TOOL_META: dict[str, Any] = {
+    "ui": {"resourceUri": UI_RESOURCE_URI},
+    "ui/resourceUri": UI_RESOURCE_URI,
+}
+_UI_HTML_PATH = Path(__file__).parent / "_ui" / "viewer.html"
+
 
 # --------------------------------------------------------------------------- #
 # Helpers
@@ -103,6 +135,21 @@ def _safe_target(filename: str) -> Path:
     if target.parent != out:
         raise ValueError("Filename must not escape the output directory")
     return target
+
+
+def _load_ui_html() -> str:
+    """Return the bundled single-file HTML for the canvas viewer.
+
+    The file is produced by the ``ui/`` Vite build and committed under
+    ``jsoncanvas/_ui/``. Raise a helpful error if it is missing.
+    """
+    try:
+        return _UI_HTML_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError as exc:  # pragma: no cover - build-time guard
+        raise RuntimeError(
+            f"Canvas viewer UI not found at {_UI_HTML_PATH}. "
+            "Build it with: cd ui && npm install && npm run build"
+        ) from exc
 
 
 def _build_canvas(
@@ -134,6 +181,7 @@ def _build_canvas(
         "Create a JSON Canvas from nodes (and optional edges) and write it as a "
         "date-prefixed .canvas file under OUTPUT_PATH."
     ),
+    meta=UI_TOOL_META,
 )
 def create_canvas(
     nodes: list[dict[str, Any]],
@@ -152,14 +200,19 @@ def create_canvas(
             and optional ``fromSide``/``toSide``/``color``/``label``).
     """
     canvas = _build_canvas(nodes, edges)
+    canvas_dict = canvas.to_dict()
     date_prefix = datetime.now().strftime("%Y-%m-%d")
     target = _safe_target(f"{date_prefix}-{filename}")
-    target.write_text(json.dumps(canvas.to_dict(), indent=2))
+    target.write_text(json.dumps(canvas_dict, indent=2))
     print(f"Wrote canvas to {target}", file=sys.stderr)
     return CreateCanvasResult(
         path=str(target),
         node_count=len(canvas.nodes),
         edge_count=len(canvas.edges),
+        canvas=CanvasDocument(
+            nodes=canvas_dict.get("nodes", []),
+            edges=canvas_dict.get("edges", []),
+        ),
     )
 
 
@@ -182,10 +235,14 @@ def validate_canvas(canvas: dict[str, Any]) -> ValidateCanvasResult:
 
 @mcp.tool(
     title="Read Canvas",
-    description="Read a .canvas file from OUTPUT_PATH and return its JSON text.",
+    description="Read a .canvas file from OUTPUT_PATH and return its nodes and edges.",
+    meta=UI_TOOL_META,
 )
-def read_canvas(filename: str) -> str:
-    """Return the JSON text of a stored canvas.
+def read_canvas(filename: str) -> CanvasDocument:
+    """Return the nodes and edges of a stored canvas.
+
+    The structured output doubles as the data source for the inline canvas
+    viewer; text-only hosts still receive the canvas JSON as text content.
 
     Args:
         filename: Name of the canvas file under OUTPUT_PATH (with or without the
@@ -194,7 +251,11 @@ def read_canvas(filename: str) -> str:
     target = _safe_target(filename)
     if not target.is_file():
         raise ValueError(f"Canvas not found: {target.name}")
-    return target.read_text()
+    data = json.loads(target.read_text())
+    return CanvasDocument(
+        nodes=data.get("nodes", []),
+        edges=data.get("edges", []),
+    )
 
 
 @mcp.tool(
@@ -273,6 +334,17 @@ def canvas_schema() -> str:
 
 
 @mcp.resource(
+    UI_RESOURCE_URI,
+    title="JSON Canvas Viewer",
+    description="Interactive read-only viewer for a JSON Canvas (MCP Apps UI).",
+    mime_type=UI_MIME_TYPE,
+)
+def canvas_viewer() -> str:
+    """Return the bundled single-file HTML for the inline canvas viewer."""
+    return _load_ui_html()
+
+
+@mcp.resource(
     "canvas://examples/basic",
     title="Basic Canvas Example",
     description="A simple canvas with two text nodes connected by an edge.",
@@ -319,6 +391,34 @@ def basic_example() -> str:
 # --------------------------------------------------------------------------- #
 # Entry point
 # --------------------------------------------------------------------------- #
+def _cors_origins() -> list[str]:
+    """Allowed CORS origins (comma-separated ``MCP_CORS_ORIGINS``; default ``*``)."""
+    raw = os.environ.get("MCP_CORS_ORIGINS", "*")
+    return [o.strip() for o in raw.split(",") if o.strip()] or ["*"]
+
+
+def _run_streamable_http_with_cors(host: str, port: int) -> None:
+    """Serve the Streamable HTTP app with permissive CORS.
+
+    Browser-based MCP hosts (the kind that render the UI resource) connect to
+    this server cross-origin and must read the ``mcp-session-id`` response
+    header, so CORS headers are required. FastMCP's default Origin validation
+    still restricts requests to localhost origins.
+    """
+    import uvicorn
+    from starlette.middleware.cors import CORSMiddleware
+
+    app = mcp.streamable_http_app()
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_cors_origins(),
+        allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+        allow_headers=["*"],
+        expose_headers=["mcp-session-id", "mcp-protocol-version"],
+    )
+    uvicorn.run(app, host=host, port=port)
+
+
 def main() -> None:
     """Run the JSON Canvas MCP server."""
     parser = argparse.ArgumentParser(
@@ -353,6 +453,8 @@ def main() -> None:
             f"{mcp.settings.streamable_http_path}",
             file=sys.stderr,
         )
+        _run_streamable_http_with_cors(args.host, args.port)
+        return
     mcp.run(transport=args.transport)
 
 

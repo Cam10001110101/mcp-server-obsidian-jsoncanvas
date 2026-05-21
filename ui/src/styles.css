@@ -1,0 +1,159 @@
+:root {
+  color-scheme: light dark;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  background: var(--color-background, #1e1e1e);
+  color: var(--color-text-primary, #e6e6e6);
+}
+
+.jc-root {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.jc-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+
+.jc-viewport.dragging {
+  cursor: grabbing;
+}
+
+.jc-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+
+.jc-edges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.jc-nodes {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.jc-node {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  overflow: hidden;
+  border: 1px solid var(--accent, var(--color-border, #3b3b3b));
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--color-background-secondary, #2a2a2a);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.jc-node.jc-text {
+  border-left: 4px solid var(--accent, var(--color-border, #3b3b3b));
+}
+
+.jc-group {
+  overflow: visible;
+  background: color-mix(in srgb, var(--accent, #888) 12%, transparent);
+  border: 2px dashed var(--accent, var(--color-border, #555));
+  box-shadow: none;
+}
+
+.jc-group-label {
+  margin: -2px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.jc-md {
+  font-size: 14px;
+  line-height: 1.45;
+  word-wrap: break-word;
+}
+
+.jc-md > :first-child {
+  margin-top: 0;
+}
+
+.jc-md h1,
+.jc-md h2,
+.jc-md h3 {
+  margin: 0.3em 0;
+  line-height: 1.2;
+}
+
+.jc-md a,
+.jc-link {
+  color: var(--color-text-link, #6ea8fe);
+}
+
+.jc-link {
+  font-size: 14px;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.jc-md pre {
+  padding: 8px;
+  overflow: auto;
+  background: var(--color-background, #111);
+  border-radius: 6px;
+}
+
+.jc-md code {
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+
+.jc-file {
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.jc-edge-label {
+  font-size: 12px;
+  fill: var(--color-text-primary, #ddd);
+  paint-order: stroke;
+  stroke: var(--color-background, #1e1e1e);
+  stroke-width: 3px;
+}
+
+.jc-empty {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  opacity: 0.6;
+}
+
+.jc-controls {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+}
+
+.jc-controls button {
+  padding: 6px 12px;
+  font: inherit;
+  color: var(--color-text-primary, #e6e6e6);
+  cursor: pointer;
+  background: var(--color-background-secondary, #2a2a2a);
+  border: 1px solid var(--color-border, #444);
+  border-radius: 6px;
+}
